@@ -1,0 +1,1786 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12101c">
+<title>ワードウルフ</title>
+<style>
+:root {
+  --bg: #12101c;
+  --bg2: #1c1830;
+  --card: #262040;
+  --card2: #2f2750;
+  --line: rgba(255, 255, 255, 0.12);
+  --text: #f4f1ff;
+  --muted: #a79dc8;
+  --accent: #ff5ea8;
+  --accent2: #7b6bff;
+  --citizen: #45d3a8;
+  --wolf: #ff5f6d;
+  --radius: 20px;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP",
+    "Yu Gothic", Meiryo, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background:
+    radial-gradient(120% 60% at 50% -10%, #3a2a63 0%, transparent 60%),
+    radial-gradient(100% 50% at 50% 110%, #2a1f4d 0%, transparent 60%),
+    var(--bg);
+  background-attachment: fixed;
+  overscroll-behavior: none;
+}
+
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: 20px 18px 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.screen { display: none; flex: 1; flex-direction: column; animation: fade 0.25s ease; }
+.screen.active { display: flex; }
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---- header ---- */
+.title {
+  text-align: center;
+  margin: 8px 0 22px;
+}
+.title h1 {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: 0.04em;
+  background: linear-gradient(100deg, var(--accent), var(--accent2) 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.title p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+
+h2.section {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 22px 0 10px;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+h2.section:first-child { margin-top: 0; }
+
+/* ---- panels & controls ---- */
+.panel {
+  background: linear-gradient(160deg, var(--card), var(--card2));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.stepper .val {
+  font-size: 30px;
+  font-weight: 800;
+  min-width: 3.5em;
+  text-align: center;
+}
+.stepper .val small { font-size: 15px; color: var(--muted); margin-left: 2px; }
+.round {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  flex: none;
+}
+.round:active { transform: scale(0.94); }
+.round:disabled { opacity: 0.3; cursor: default; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 9px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.chip.on {
+  background: linear-gradient(100deg, var(--accent), var(--accent2));
+  color: #fff;
+  border-color: transparent;
+  font-weight: 700;
+}
+.chip:active { transform: scale(0.96); }
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 2px;
+}
+.row + .row { border-top: 1px solid var(--line); }
+.row .label { font-size: 15px; }
+.row .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+.switch {
+  width: 54px; height: 30px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  position: relative;
+  cursor: pointer;
+  flex: none;
+  transition: background 0.2s;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+}
+.switch.on { background: linear-gradient(100deg, var(--accent), var(--accent2)); }
+.switch.on::after { transform: translateX(24px); }
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(100deg, var(--accent), var(--accent2));
+  color: #fff;
+  font-size: 19px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255, 94, 168, 0.28);
+}
+.btn:active { transform: scale(0.98); }
+.btn.sub {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--line);
+  box-shadow: none;
+  font-size: 16px;
+  padding: 14px;
+  font-weight: 700;
+}
+.btn:disabled { opacity: 0.35; cursor: default; }
+.btn-row { display: flex; gap: 10px; }
+.btn-row .btn { flex: 1; }
+
+.spacer { flex: 1; min-height: 20px; }
+.foot { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ---- name list ---- */
+.names { display: flex; flex-direction: column; gap: 8px; }
+.names input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  font-size: 16px;
+  font-family: inherit;
+}
+.names input:focus { outline: 2px solid var(--accent2); }
+
+/* ---- reveal ---- */
+.progress-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.18); }
+.dot.done { background: var(--citizen); }
+.dot.now { background: var(--accent); transform: scale(1.4); }
+
+.turn { text-align: center; margin-bottom: 8px; }
+.turn .no { color: var(--muted); font-size: 14px; letter-spacing: 0.1em; }
+.turn .who { font-size: 32px; font-weight: 800; margin-top: 4px; word-break: break-word; }
+
+.holder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 14px 0;
+}
+.wordcard {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 46vh;
+  border-radius: 28px;
+  border: 2px dashed rgba(255, 255, 255, 0.25);
+  background: linear-gradient(160deg, var(--card), var(--card2));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  text-align: center;
+  padding: 16px;
+  transition: transform 0.12s, border-color 0.15s;
+}
+.wordcard:active { transform: scale(0.985); }
+.wordcard .lock { font-size: 46px; }
+.wordcard .msg { color: var(--muted); font-size: 15px; line-height: 1.6; }
+.wordcard.open {
+  border: 2px solid var(--accent);
+  background: linear-gradient(160deg, #3a2a63, #241c44);
+  box-shadow: 0 0 40px rgba(255, 94, 168, 0.25) inset;
+}
+.wordcard .word {
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1.25;
+  word-break: break-word;
+}
+.wordcard .cat { color: var(--muted); font-size: 14px; }
+
+/* ---- timer ---- */
+.clock {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.clock .time {
+  font-size: 84px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.clock .time.warn { color: #ffd166; }
+.clock .time.danger { color: var(--wolf); animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: 0.45; } }
+.clock .state { color: var(--muted); font-size: 15px; }
+
+.bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  margin-top: 18px;
+}
+.bar > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width 0.3s linear;
+}
+
+/* ---- vote ---- */
+.list { display: flex; flex-direction: column; gap: 10px; }
+.pbtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, var(--card), var(--card2));
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.pbtn:active { transform: scale(0.98); }
+.pbtn.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.pbtn:disabled { opacity: 0.3; }
+.pbtn .tag { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+.tally { display: flex; flex-direction: column; gap: 8px; }
+.tally .t {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 10px;
+  align-items: center;
+}
+.tally .t .nm { font-size: 15px; font-weight: 700; }
+.tally .t .ct { font-size: 14px; color: var(--muted); }
+.tally .t .tb { grid-column: 1 / -1; height: 8px; border-radius: 999px; background: rgba(255,255,255,0.1); overflow: hidden; }
+.tally .t .tb > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+
+/* ---- result ---- */
+.verdict {
+  text-align: center;
+  padding: 26px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, var(--card), var(--card2));
+}
+.verdict .big { font-size: 40px; font-weight: 900; line-height: 1.2; }
+.verdict .sub { color: var(--muted); margin-top: 8px; font-size: 14px; line-height: 1.6; }
+.verdict.citizen .big { color: var(--citizen); }
+.verdict.wolf .big { color: var(--wolf); }
+
+.words2 { display: flex; gap: 10px; margin-top: 14px; }
+.words2 .w {
+  flex: 1;
+  padding: 14px 10px;
+  border-radius: 16px;
+  text-align: center;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+}
+.words2 .w .k { font-size: 12px; letter-spacing: 0.08em; }
+.words2 .w .v { font-size: 21px; font-weight: 800; margin-top: 6px; word-break: break-word; }
+.words2 .w.is-citizen .k { color: var(--citizen); }
+.words2 .w.is-wolf .k { color: var(--wolf); }
+
+.suspense {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 180px;
+}
+.suspense .mark { font-size: 64px; animation: sway 2.4s ease-in-out infinite; }
+.suspense .q {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+@keyframes sway {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-8px) rotate(4deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .suspense .mark { animation: none; }
+  .clock .time.danger { animation: none; }
+}
+
+.roles { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.roles .r {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  font-size: 16px;
+}
+.roles .r .badge { font-size: 13px; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
+.roles .r.c .badge { background: rgba(69, 211, 168, 0.18); color: var(--citizen); }
+.roles .r.w .badge { background: rgba(255, 95, 109, 0.18); color: var(--wolf); }
+.roles .r .out { font-size: 12px; color: var(--muted); margin-left: 8px; }
+
+.note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  text-align: center;
+  margin-top: 14px;
+}
+
+.rules { color: var(--muted); font-size: 14px; line-height: 1.85; }
+.rules b { color: var(--text); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ========== 設定 ========== -->
+  <section id="screen-setup" class="screen active">
+    <div class="title">
+      <h1>ワードウルフ</h1>
+      <p>スマホ1台で回して遊ぶ、少数派当てゲーム</p>
+    </div>
+
+    <h2 class="section">人数</h2>
+    <div class="panel">
+      <div class="stepper">
+        <button class="round" id="pl-minus" aria-label="人数を減らす">−</button>
+        <div class="val"><span id="pl-count">4</span><small>人</small></div>
+        <button class="round" id="pl-plus" aria-label="人数を増やす">＋</button>
+      </div>
+    </div>
+
+    <h2 class="section">ウルフの人数</h2>
+    <div class="panel">
+      <div class="chips" id="wolf-chips"></div>
+    </div>
+
+    <h2 class="section">議論タイム</h2>
+    <div class="panel">
+      <div class="chips" id="time-chips"></div>
+    </div>
+
+    <h2 class="section">お題ジャンル（複数選択OK）</h2>
+    <div class="panel">
+      <div class="chips" id="cat-chips"></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn sub" id="cat-hot">有名人・時事だけ</button>
+        <button class="btn sub" id="cat-classic">定番だけ</button>
+      </div>
+      <div class="btn-row" style="margin-top:8px">
+        <button class="btn sub" id="cat-all">すべて</button>
+        <button class="btn sub" id="cat-none">解除</button>
+      </div>
+    </div>
+
+    <h2 class="section">オプション</h2>
+    <div class="panel">
+      <div class="row">
+        <div>
+          <div class="label">名前を入力する</div>
+          <div class="hint">オフなら「プレイヤー1」などになります</div>
+        </div>
+        <button class="switch" id="opt-names" role="switch" aria-label="名前を入力する"></button>
+      </div>
+      <div class="row">
+        <div>
+          <div class="label">しっかり投票</div>
+          <div class="hint">1人ずつ投票して集計（オフなら追放者を1人選ぶだけ）</div>
+        </div>
+        <button class="switch" id="opt-vote" role="switch" aria-label="しっかり投票"></button>
+      </div>
+      <div class="row">
+        <div>
+          <div class="label">AI音声で発表</div>
+          <div class="hint">結果画面のボタンで、ウルフの名前を読み上げます</div>
+        </div>
+        <button class="switch" id="opt-voice" role="switch" aria-label="AI音声で発表"></button>
+      </div>
+      <div class="row">
+        <div>
+          <div class="label">ウルフの逆転チャンス</div>
+          <div class="hint">追放されたウルフが市民のワードを当てたら逆転勝ち</div>
+        </div>
+        <button class="switch" id="opt-revenge" role="switch" aria-label="ウルフの逆転チャンス"></button>
+      </div>
+    </div>
+
+    <div id="names-wrap" style="display:none">
+      <h2 class="section">プレイヤー名</h2>
+      <div class="panel"><div class="names" id="names-list"></div></div>
+    </div>
+
+    <div class="foot">
+      <button class="btn" id="start">ゲームスタート</button>
+      <button class="btn sub" id="show-rules">遊び方を見る</button>
+    </div>
+  </section>
+
+  <!-- ========== ワード確認 ========== -->
+  <section id="screen-reveal" class="screen">
+    <div class="progress-dots" id="dots"></div>
+    <div class="turn">
+      <div class="no" id="reveal-no">1人目 / 4人</div>
+      <div class="who" id="reveal-name">プレイヤー1</div>
+    </div>
+    <div class="holder">
+      <div class="wordcard" id="card">
+        <div class="lock">🤫</div>
+        <div class="msg">長押し（押しっぱなし）で<br>あなたのワードが表示されます</div>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn" id="reveal-next" disabled>次の人へ</button>
+      <div class="note">他の人に画面を見られないように！<br>指を離すとワードは隠れます。</div>
+    </div>
+  </section>
+
+  <!-- ========== タイマー ========== -->
+  <section id="screen-timer" class="screen">
+    <div class="title"><h1>議論タイム</h1><p id="timer-topic">全員のワードは配り終わりました</p></div>
+    <div class="clock">
+      <div class="time" id="time">3:00</div>
+      <div class="state" id="timer-state">タップでスタート</div>
+      <div class="bar"><i id="timer-bar" style="width:100%"></i></div>
+    </div>
+    <div class="foot">
+      <div class="btn-row">
+        <button class="btn sub" id="timer-toggle">スタート</button>
+        <button class="btn sub" id="timer-plus">＋30秒</button>
+      </div>
+      <button class="btn" id="to-vote">投票へ進む</button>
+    </div>
+  </section>
+
+  <!-- ========== 投票 ========== -->
+  <section id="screen-vote" class="screen">
+    <div class="title"><h1 id="vote-title">投票</h1><p id="vote-sub">ウルフだと思う人を選ぼう</p></div>
+    <div class="list" id="vote-list"></div>
+    <div class="spacer"></div>
+    <div class="foot">
+      <button class="btn" id="vote-confirm" disabled>決定</button>
+      <button class="btn sub" id="vote-back">タイマーに戻る</button>
+    </div>
+  </section>
+
+  <!-- ========== 集計 ========== -->
+  <section id="screen-tally" class="screen">
+    <div class="title"><h1>開票</h1><p id="tally-sub"></p></div>
+    <div class="panel"><div class="tally" id="tally-list"></div></div>
+    <div class="spacer"></div>
+    <div class="foot">
+      <button class="btn" id="tally-next">結果を見る</button>
+    </div>
+  </section>
+
+  <!-- ========== 結果 ========== -->
+  <section id="screen-result" class="screen">
+    <div class="verdict" id="verdict">
+      <div class="big" id="verdict-big"></div>
+      <div class="sub" id="verdict-sub"></div>
+    </div>
+    <div class="words2" id="words2">
+      <div class="w is-citizen"><div class="k">市民のワード</div><div class="v" id="w-citizen"></div></div>
+      <div class="w is-wolf"><div class="k">ウルフのワード</div><div class="v" id="w-wolf"></div></div>
+    </div>
+    <div class="suspense" id="suspense">
+      <div class="mark">🐺</div>
+      <div class="q">ウルフは……？</div>
+    </div>
+    <h2 class="section" id="roles-head" hidden>正体</h2>
+    <div class="roles" id="roles" hidden></div>
+    <div class="spacer"></div>
+    <div class="foot" id="result-foot">
+      <button class="btn" id="again-same">同じメンバーでもう1回</button>
+      <button class="btn sub" id="again-setup">設定に戻る</button>
+    </div>
+  </section>
+
+  <!-- ========== 遊び方 ========== -->
+  <section id="screen-rules" class="screen">
+    <div class="title"><h1>遊び方</h1><p>3人以上、スマホ1台でOK</p></div>
+    <div class="panel rules">
+      <b>1. ワードを配る</b><br>
+      スマホを回して、1人ずつ自分のワードをこっそり確認。<br>
+      ほとんどの人は同じワード（市民）ですが、少数の人だけ違うワード（ウルフ）を持っています。<br>
+      <b>自分がウルフかどうかは分かりません。</b><br><br>
+
+      <b>2. 議論する</b><br>
+      制限時間内に、自分のワードについて話します。<br>
+      ストレートに言うと市民にバレるので、少しぼかして話すのがコツ。<br>
+      「それいつ食べる？」など、みんなに質問するのも有効です。<br><br>
+
+      <b>3. 投票する</b><br>
+      せーの、で「ウルフっぽい人」を指差し。最多票の人が追放されます。<br><br>
+
+      <b>4. 勝敗</b><br>
+      ・ウルフを追放できたら <b>市民の勝ち</b><br>
+      ・市民を追放してしまったら <b>ウルフの勝ち</b><br>
+      ・同票のときは再投票（決着がつかなければウルフの勝ち）<br>
+      ・ウルフが複数いる場合も、<b>1人でも追放できれば市民の勝ち</b><br><br>
+
+      <b>逆転チャンス（オプション）</b><br>
+      追放されたウルフが市民のワードをズバリ当てたら、ウルフの逆転勝ちになります。<br><br>
+
+      <b>ウルフの発表（AI音声）</b><br>
+      結果画面の「ウルフを発表する」を押すと、ドラムロールのあとに
+      AI音声がウルフの名前を読み上げます。名前を入力しておくと盛り上がります。<br><br>
+
+      <b>有名人お題のコツ</b><br>
+      「YouTuber」「芸能人」「スポーツ選手」「時事・トレンド」のお題は、
+      <b>その場の全員が知っている人・話題</b>だからこそ成立します。
+      知らない名前が出たら、その回はスキップしてもう一度引くのが健全です。
+    </div>
+    <div class="spacer"></div>
+    <div class="foot"><button class="btn" id="rules-back">戻る</button></div>
+  </section>
+
+</div>
+
+<script>
+// ワードウルフ お題データ
+//
+// 各ペアは [ワードA, ワードB]。どちらが市民側（多数派）になるかは毎回ランダムで入れ替わる。
+// group: 'hot' = 有名人・時事ネタ系 / 'classic' = 定番のモノ・コト系
+//
+// ペアを選ぶ基準（追加するときもこれを守ると遊びとして成立する）
+//   1. 両方とも「その場の全員が知っている」レベルの知名度であること
+//   2. 同じジャンル・同じ立ち位置であること（例：トップYouTuber同士、同競技の選手同士）
+//   3. 話し方や思い出は違うのに、話題としては会話が成立する距離感であること
+const WORD_SETS = {
+  /* ============ 有名人・時事ネタ系 ============ */
+
+  youtuber: {
+    label: '📺 YouTuber・配信者',
+    group: 'hot',
+    pairs: [
+      ['HIKAKIN', 'はじめしゃちょー'],
+      ['東海オンエア', 'フィッシャーズ'],
+      ['コムドット', 'フィッシャーズ'],
+      ['Junya.じゅんや', 'ISSEI'],
+      ['Sagawa', 'Junya.じゅんや'],
+      ['きまぐれクック', 'リュウジ'],
+      ['ホロライブ', 'にじさんじ'],
+      ['兎田ぺこら', '星街すいせい'],
+      ['加藤純一', '布団ちゃん'],
+      ['QuizKnock', '中田敦彦'],
+      ['ヒカル', 'ラファエル'],
+      ['ひろゆき', '堀江貴文'],
+      ['キヨ', 'レトルト'],
+      ['朝倉未来', '朝倉海'],
+    ],
+  },
+
+  celeb: {
+    label: '✨ 芸能人・アーティスト',
+    group: 'hot',
+    pairs: [
+      ['明石家さんま', 'タモリ'],
+      ['有吉弘行', 'マツコ・デラックス'],
+      ['出川哲朗', '岡村隆史'],
+      ['千鳥', 'かまいたち'],
+      ['ミルクボーイ', '霜降り明星'],
+      ['大泉洋', 'ムロツヨシ'],
+      ['菅田将暉', '神木隆之介'],
+      ['佐藤健', '山田涼介'],
+      ['橋本環奈', '浜辺美波'],
+      ['綾瀬はるか', '新垣結衣'],
+      ['芦田愛菜', '鈴木福'],
+      ['木村拓哉', '福山雅治'],
+      ['米津玄師', 'King Gnu'],
+      ['Ado', 'YOASOBI'],
+      ['あいみょん', '藤井風'],
+      ['Creepy Nuts', 'King Gnu'],
+      ['Snow Man', 'なにわ男子'],
+      ['Number_i', 'M!LK'],
+      ['乃木坂46', '日向坂46'],
+      ['BTS', 'BLACKPINK'],
+    ],
+  },
+
+  athlete: {
+    label: '🏆 スポーツ選手',
+    group: 'hot',
+    pairs: [
+      ['大谷翔平', '山本由伸'],
+      ['佐々木朗希', '今永昇太'],
+      ['イチロー', '松井秀喜'],
+      ['井上尚弥', '那須川天心'],
+      ['羽生結弦', '宇野昌磨'],
+      ['八村塁', '渡邊雄太'],
+      ['三笘薫', '久保建英'],
+      ['遠藤航', '冨安健洋'],
+      ['藤井聡太', '羽生善治'],
+      ['大坂なおみ', '錦織圭'],
+      ['サニブラウン', '桐生祥秀'],
+      ['張本智和', '早田ひな'],
+      ['阿部一二三', '阿部詩'],
+      ['照ノ富士', '大の里'],
+    ],
+  },
+
+  trend: {
+    label: '📰 時事・トレンド',
+    group: 'hot',
+    pairs: [
+      ['ChatGPT', 'Gemini'],
+      ['AIイラスト', 'AI動画'],
+      ['Nintendo Switch 2', 'PS5'],
+      ['ドバイチョコ', '台湾カステラ'],
+      ['シール帳', 'プリクラ'],
+      ['円安', '物価高'],
+      ['ふるさと納税', 'NISA'],
+      ['PayPay', '楽天ペイ'],
+      ['マイナンバーカード', '確定申告'],
+      ['猛暑日', 'ゲリラ豪雨'],
+      ['インバウンド', 'オーバーツーリズム'],
+      ['サウナ', '岩盤浴'],
+      ['推し活', 'ポイ活'],
+      ['リモートワーク', '週休3日'],
+      ['電動キックボード', 'シェアサイクル'],
+      ['サブスク', 'クラウドファンディング'],
+      ['大阪・関西万博', 'オリンピック'],
+      ['Z世代', 'ゆとり世代'],
+      ['韓国グルメ', '台湾グルメ'],
+      ['熱中症', '花粉症'],
+    ],
+  },
+
+  anime: {
+    label: '🎬 アニメ・漫画',
+    group: 'hot',
+    pairs: [
+      ['ワンピース', 'NARUTO -ナルト-'],
+      ['ドラゴンボール', 'ワンピース'],
+      ['鬼滅の刃', '呪術廻戦'],
+      ['チェンソーマン', '呪術廻戦'],
+      ['進撃の巨人', '約束のネバーランド'],
+      ['HUNTER×HUNTER', '幽☆遊☆白書'],
+      ['ドラえもん', 'クレヨンしんちゃん'],
+      ['サザエさん', 'ちびまる子ちゃん'],
+      ['アンパンマン', 'ドラえもん'],
+      ['ポケモン', '妖怪ウォッチ'],
+      ['名探偵コナン', '金田一少年の事件簿'],
+      ['スラムダンク', 'ハイキュー!!'],
+      ['ブルーロック', 'ハイキュー!!'],
+      ['となりのトトロ', '千と千尋の神隠し'],
+      ['君の名は。', '天気の子'],
+      ['エヴァンゲリオン', '機動戦士ガンダム'],
+      ['セーラームーン', 'プリキュア'],
+      ['けいおん!', 'ぼっち・ざ・ろっく!'],
+      ['ラブライブ!', 'アイドルマスター'],
+      ['葬送のフリーレン', 'ダンジョン飯'],
+      ['SPY×FAMILY', '【推しの子】'],
+      ['銀魂', '斉木楠雄のΨ難'],
+      ['ちいかわ', 'すみっコぐらし'],
+    ],
+  },
+
+  character: {
+    label: '🦸 アニメキャラ',
+    group: 'hot',
+    pairs: [
+      ['ルフィ', 'ゾロ'],
+      ['ナルト', 'サスケ'],
+      ['炭治郎', '善逸'],
+      ['孫悟空', 'ベジータ'],
+      ['五条悟', '虎杖悠仁'],
+      ['ゴン', 'キルア'],
+      ['ドラえもん', 'のび太'],
+      ['ジャイアン', 'スネ夫'],
+      ['しんのすけ', '風間くん'],
+      ['磯野カツオ', '磯野ワカメ'],
+      ['アンパンマン', 'バイキンマン'],
+      ['ピカチュウ', 'イーブイ'],
+      ['トトロ', 'ポニョ'],
+      ['桜木花道', '流川楓'],
+      ['日向翔陽', '影山飛雄'],
+      ['綾波レイ', 'アスカ'],
+      ['セーラームーン', 'セーラーマーズ'],
+      ['名探偵コナン', '服部平次'],
+      ['ハローキティ', 'マイメロディ'],
+      ['ミッキーマウス', 'ドナルドダック'],
+      ['くまのプーさん', 'スティッチ'],
+      ['ちいかわ', 'ハチワレ'],
+    ],
+  },
+
+  /* ============ 定番のモノ・コト系 ============ */
+
+  food: {
+    label: '🍜 食べ物',
+    group: 'classic',
+    pairs: [
+      ['ラーメン', 'うどん'],
+      ['寿司', '刺身'],
+      ['カレー', 'ハヤシライス'],
+      ['たこ焼き', 'お好み焼き'],
+      ['ハンバーガー', 'サンドイッチ'],
+      ['アイス', 'かき氷'],
+      ['チョコレート', 'クッキー'],
+      ['牛丼', '親子丼'],
+      ['ピザ', 'パスタ'],
+      ['焼肉', 'しゃぶしゃぶ'],
+      ['唐揚げ', 'とんかつ'],
+      ['おにぎり', 'お弁当'],
+      ['コーヒー', '紅茶'],
+      ['ケーキ', 'プリン'],
+      ['餃子', 'シュウマイ'],
+      ['みかん', 'オレンジ'],
+      ['味噌汁', 'スープ'],
+      ['納豆', '生卵'],
+    ],
+  },
+  animal: {
+    label: '🐶 生き物',
+    group: 'classic',
+    pairs: [
+      ['犬', '猫'],
+      ['ライオン', 'トラ'],
+      ['ゾウ', 'キリン'],
+      ['ペンギン', 'アザラシ'],
+      ['サメ', 'イルカ'],
+      ['カブトムシ', 'クワガタ'],
+      ['ハムスター', 'ウサギ'],
+      ['カラス', 'ハト'],
+      ['金魚', 'メダカ'],
+      ['ゴキブリ', '蚊'],
+      ['パンダ', 'コアラ'],
+      ['馬', '牛'],
+      ['ヘビ', 'トカゲ'],
+      ['カメ', 'カエル'],
+      ['ニワトリ', 'アヒル'],
+      ['クジラ', 'マグロ'],
+    ],
+  },
+  place: {
+    label: '🏫 場所',
+    group: 'classic',
+    pairs: [
+      ['学校', '塾'],
+      ['病院', '歯医者'],
+      ['コンビニ', 'スーパー'],
+      ['温泉', '銭湯'],
+      ['映画館', '劇場'],
+      ['公園', '広場'],
+      ['海', 'プール'],
+      ['遊園地', '動物園'],
+      ['図書館', '本屋'],
+      ['ホテル', '旅館'],
+      ['空港', '駅'],
+      ['神社', 'お寺'],
+      ['カラオケ', 'ボウリング場'],
+      ['美容院', '床屋'],
+      ['山', '森'],
+      ['ファミレス', '居酒屋'],
+    ],
+  },
+  item: {
+    label: '🪥 日用品',
+    group: 'classic',
+    pairs: [
+      ['歯ブラシ', 'ヘアブラシ'],
+      ['傘', 'レインコート'],
+      ['財布', 'カバン'],
+      ['枕', '布団'],
+      ['冷蔵庫', '電子レンジ'],
+      ['洗濯機', '掃除機'],
+      ['鏡', '窓'],
+      ['ハサミ', 'カッター'],
+      ['消しゴム', '修正テープ'],
+      ['スマホ', 'タブレット'],
+      ['時計', 'カレンダー'],
+      ['スリッパ', '靴下'],
+      ['ティッシュ', 'タオル'],
+      ['エアコン', '扇風機'],
+      ['石鹸', 'シャンプー'],
+      ['めがね', 'コンタクト'],
+    ],
+  },
+  entertainment: {
+    label: '🎮 エンタメ',
+    group: 'classic',
+    pairs: [
+      ['YouTube', 'TikTok'],
+      ['漫画', 'アニメ'],
+      ['映画', 'ドラマ'],
+      ['カラオケ', 'ライブ'],
+      ['ゲームセンター', 'パチンコ'],
+      ['アイドル', '俳優'],
+      ['お笑い芸人', 'YouTuber'],
+      ['音楽フェス', '花火大会'],
+      ['トランプ', 'UNO'],
+      ['将棋', '囲碁'],
+      ['ジェットコースター', '観覧車'],
+      ['ぬいぐるみ', 'フィギュア'],
+      ['Instagram', 'X（Twitter）'],
+      ['ソシャゲ', '家庭用ゲーム'],
+      ['推し活', 'オタ活'],
+    ],
+  },
+  school: {
+    label: '💼 学校・仕事',
+    group: 'classic',
+    pairs: [
+      ['宿題', '課題'],
+      ['テスト', '模試'],
+      ['体育祭', '文化祭'],
+      ['給食', 'お弁当'],
+      ['部活', 'サークル'],
+      ['修学旅行', '遠足'],
+      ['卒業式', '入学式'],
+      ['先生', '塾講師'],
+      ['会議', '朝礼'],
+      ['残業', '休日出勤'],
+      ['名刺', '履歴書'],
+      ['上司', '先輩'],
+      ['定時', '締切'],
+      ['出張', '転勤'],
+      ['在宅勤務', '有給'],
+    ],
+  },
+  sports: {
+    label: '⚽ スポーツ',
+    group: 'classic',
+    pairs: [
+      ['サッカー', 'フットサル'],
+      ['野球', 'ソフトボール'],
+      ['バスケ', 'バレー'],
+      ['マラソン', '駅伝'],
+      ['水泳', 'サーフィン'],
+      ['柔道', '空手'],
+      ['テニス', '卓球'],
+      ['ゴルフ', 'ボウリング'],
+      ['相撲', 'レスリング'],
+      ['スキー', 'スノーボード'],
+      ['筋トレ', 'ヨガ'],
+      ['オリンピック', 'ワールドカップ'],
+      ['ランニング', 'ウォーキング'],
+      ['自転車', 'バイク'],
+    ],
+  },
+  love: {
+    label: '💘 恋愛・人間関係',
+    group: 'classic',
+    pairs: [
+      ['デート', '合コン'],
+      ['告白', 'プロポーズ'],
+      ['恋人', '親友'],
+      ['結婚式', '披露宴'],
+      ['けんか', '別れ話'],
+      ['LINE', '電話'],
+      ['片思い', '両思い'],
+      ['元カレ・元カノ', '幼なじみ'],
+      ['ハグ', 'キス'],
+      ['記念日', '誕生日'],
+      ['浮気', '嘘'],
+      ['初恋', '一目惚れ'],
+      ['既読スルー', '未読スルー'],
+    ],
+  },
+  season: {
+    label: '🎄 季節・イベント',
+    group: 'classic',
+    pairs: [
+      ['クリスマス', 'バレンタイン'],
+      ['お正月', '大晦日'],
+      ['お花見', '紅葉狩り'],
+      ['夏祭り', '花火大会'],
+      ['ハロウィン', 'コスプレ'],
+      ['忘年会', '新年会'],
+      ['雪', '雨'],
+      ['梅雨', '台風'],
+      ['夏休み', '冬休み'],
+      ['初詣', 'お墓参り'],
+      ['バレンタイン', 'ホワイトデー'],
+      ['運動会', '遠足'],
+      ['衣替え', '大掃除'],
+    ],
+  },
+  aruaru: {
+    label: '😂 あるある',
+    group: 'classic',
+    pairs: [
+      ['遅刻', '寝坊'],
+      ['二度寝', '昼寝'],
+      ['満員電車', '渋滞'],
+      ['独り言', '寝言'],
+      ['くしゃみ', 'あくび'],
+      ['貯金', '借金'],
+      ['ダイエット', '断食'],
+      ['占い', 'おみくじ'],
+      ['宝くじ', 'ガチャ'],
+      ['充電切れ', '通信制限'],
+      ['筋肉痛', '肩こり'],
+      ['虫歯', '口内炎'],
+      ['行列', '順番待ち'],
+      ['迷子', '道に迷う'],
+      ['サプライズ', 'ドッキリ'],
+    ],
+  },
+};
+
+/* ワードウルフ - スマホ1台で遊ぶ少数派当てゲーム */
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var LS_KEY = 'wordwolf.config.v1';
+  var MIN_PLAYERS = 3;
+  var MAX_PLAYERS = 12;
+  var TIME_OPTIONS = [30, 60, 120, 180, 300];
+
+  function catsInGroup(group) {
+    return Object.keys(WORD_SETS).filter(function (k) { return WORD_SETS[k].group === group; });
+  }
+
+  var cfg = {
+    players: 4,
+    wolves: 1,
+    seconds: 180,
+    cats: catsInGroup('hot'),
+    useNames: false,
+    strictVote: false,
+    revenge: true,
+    voice: true,
+    names: [],
+  };
+
+  var game = null;
+
+  /* ---------------- 汎用 ---------------- */
+
+  function show(name) {
+    var list = document.querySelectorAll('.screen');
+    for (var i = 0; i < list.length; i++) list[i].classList.remove('active');
+    $('screen-' + name).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function fmtTime(sec) {
+    if (sec < 0) sec = 0;
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function esc(str) {
+    return String(str).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function maxWolves(players) {
+    return Math.max(1, Math.min(3, Math.floor((players - 1) / 2)));
+  }
+
+  function defaultName(i) { return 'プレイヤー' + (i + 1); }
+
+  function playerName(i) {
+    var n = cfg.names[i];
+    return n && n.trim() ? n.trim() : defaultName(i);
+  }
+
+  function saveCfg() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) {}
+  }
+
+  function loadCfg() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (typeof s.players === 'number') cfg.players = Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, s.players));
+      if (typeof s.wolves === 'number') cfg.wolves = s.wolves;
+      if (typeof s.seconds === 'number') cfg.seconds = s.seconds;
+      if (Array.isArray(s.cats)) {
+        var valid = s.cats.filter(function (k) { return WORD_SETS[k]; });
+        if (valid.length) cfg.cats = valid;
+      }
+      if (typeof s.useNames === 'boolean') cfg.useNames = s.useNames;
+      if (typeof s.strictVote === 'boolean') cfg.strictVote = s.strictVote;
+      if (typeof s.revenge === 'boolean') cfg.revenge = s.revenge;
+      if (typeof s.voice === 'boolean') cfg.voice = s.voice;
+      if (Array.isArray(s.names)) cfg.names = s.names;
+    } catch (e) {}
+    cfg.wolves = Math.min(cfg.wolves, maxWolves(cfg.players));
+  }
+
+  /* ---------------- 効果音 ---------------- */
+
+  var actx = null;
+  function beep(freq, dur, vol) {
+    try {
+      if (!actx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        actx = new AC();
+      }
+      if (actx.state === 'suspended') actx.resume();
+      var o = actx.createOscillator();
+      var g = actx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.value = vol == null ? 0.2 : vol;
+      o.connect(g); g.connect(actx.destination);
+      var now = actx.currentTime;
+      o.start(now);
+      g.gain.setValueAtTime(g.gain.value, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      o.stop(now + dur + 0.02);
+    } catch (e) {}
+  }
+
+  function buzz(pattern) {
+    if (navigator.vibrate) { try { navigator.vibrate(pattern); } catch (e) {} }
+  }
+
+  /* ---------------- 音声読み上げ ---------------- */
+
+  var voices = [];
+
+  function speechReady() {
+    return !!(window.speechSynthesis && typeof window.SpeechSynthesisUtterance === 'function');
+  }
+
+  function loadVoices() {
+    try { voices = window.speechSynthesis.getVoices() || []; } catch (e) { voices = []; }
+  }
+
+  function jaVoice() {
+    for (var i = 0; i < voices.length; i++) {
+      var lang = (voices[i].lang || '').toLowerCase();
+      if (lang.indexOf('ja') === 0) return voices[i];
+    }
+    return null;
+  }
+
+  // text を読み上げ、終わったら onend を呼ぶ。読み上げできない環境でも onend は必ず呼ぶ。
+  function speak(text, rate, onend) {
+    var done = false;
+    var fin = function () { if (done) return; done = true; if (onend) onend(); };
+    if (!speechReady()) { setTimeout(fin, 300); return; }
+    try {
+      var u = new window.SpeechSynthesisUtterance(text);
+      u.lang = 'ja-JP';
+      var v = jaVoice();
+      if (v) u.voice = v;
+      u.rate = rate || 1;
+      u.pitch = 1.05;
+      u.onend = fin;
+      u.onerror = fin;
+      setTimeout(fin, Math.max(1600, text.length * 280));
+      window.speechSynthesis.speak(u);
+    } catch (e) { fin(); }
+  }
+
+  function stopSpeech() {
+    if (speechReady()) { try { window.speechSynthesis.cancel(); } catch (e) {} }
+  }
+
+  /* ---------------- 設定画面 ---------------- */
+
+  function renderSetup() {
+    $('pl-count').textContent = cfg.players;
+    $('pl-minus').disabled = cfg.players <= MIN_PLAYERS;
+    $('pl-plus').disabled = cfg.players >= MAX_PLAYERS;
+
+    // ウルフ人数
+    var mw = maxWolves(cfg.players);
+    if (cfg.wolves > mw) cfg.wolves = mw;
+    var wc = $('wolf-chips');
+    wc.innerHTML = '';
+    for (var n = 1; n <= mw; n++) {
+      (function (n) {
+        var b = document.createElement('button');
+        b.className = 'chip' + (cfg.wolves === n ? ' on' : '');
+        b.textContent = n + '人';
+        b.onclick = function () { cfg.wolves = n; saveCfg(); renderSetup(); };
+        wc.appendChild(b);
+      })(n);
+    }
+
+    // 時間
+    var tc = $('time-chips');
+    tc.innerHTML = '';
+    TIME_OPTIONS.forEach(function (s) {
+      var b = document.createElement('button');
+      b.className = 'chip' + (cfg.seconds === s ? ' on' : '');
+      b.textContent = s < 60 ? s + '秒' : (s / 60) + '分';
+      b.onclick = function () { cfg.seconds = s; saveCfg(); renderSetup(); };
+      tc.appendChild(b);
+    });
+
+    // ジャンル
+    var cc = $('cat-chips');
+    cc.innerHTML = '';
+    Object.keys(WORD_SETS).forEach(function (key) {
+      var b = document.createElement('button');
+      var on = cfg.cats.indexOf(key) >= 0;
+      b.className = 'chip' + (on ? ' on' : '');
+      b.textContent = WORD_SETS[key].label;
+      b.onclick = function () {
+        var i = cfg.cats.indexOf(key);
+        if (i >= 0) cfg.cats.splice(i, 1); else cfg.cats.push(key);
+        saveCfg();
+        renderSetup();
+      };
+      cc.appendChild(b);
+    });
+
+    $('opt-names').classList.toggle('on', cfg.useNames);
+    $('opt-vote').classList.toggle('on', cfg.strictVote);
+    $('opt-revenge').classList.toggle('on', cfg.revenge);
+    $('opt-voice').classList.toggle('on', cfg.voice);
+
+    $('names-wrap').style.display = cfg.useNames ? '' : 'none';
+    if (cfg.useNames) renderNameInputs();
+
+    $('start').disabled = cfg.cats.length === 0;
+    $('start').textContent = cfg.cats.length === 0 ? 'ジャンルを1つ以上選んでね' : 'ゲームスタート';
+  }
+
+  function renderNameInputs() {
+    var wrap = $('names-list');
+    wrap.innerHTML = '';
+    for (var i = 0; i < cfg.players; i++) {
+      (function (i) {
+        var inp = document.createElement('input');
+        inp.type = 'text';
+        inp.maxLength = 12;
+        inp.placeholder = defaultName(i);
+        inp.value = cfg.names[i] || '';
+        inp.oninput = function () { cfg.names[i] = inp.value; saveCfg(); };
+        wrap.appendChild(inp);
+      })(i);
+    }
+  }
+
+  /* ---------------- ゲーム開始 ---------------- */
+
+  function startGame() {
+    var pool = [];
+    cfg.cats.forEach(function (key) {
+      WORD_SETS[key].pairs.forEach(function (p) {
+        pool.push({ pair: p, cat: WORD_SETS[key].label });
+      });
+    });
+    if (!pool.length) return;
+
+    var chosen = pick(pool);
+    var pair = chosen.pair.slice();
+    if (Math.random() < 0.5) pair.reverse();
+
+    var players = [];
+    for (var i = 0; i < cfg.players; i++) {
+      players.push({ name: playerName(i), isWolf: false, word: pair[0] });
+    }
+    var idx = shuffle(players.map(function (_, i) { return i; }));
+    for (var w = 0; w < cfg.wolves; w++) {
+      players[idx[w]].isWolf = true;
+      players[idx[w]].word = pair[1];
+    }
+
+    game = {
+      players: players,
+      citizenWord: pair[0],
+      wolfWord: pair[1],
+      category: chosen.cat,
+      revealIdx: 0,
+      votes: null,
+      voterIdx: 0,
+      candidates: null,
+      executed: null,
+      revengeAsked: false,
+      announced: false,
+      jinglePlayed: false,
+    };
+
+    stopSpeech();
+
+    saveCfg();
+    startReveal();
+  }
+
+  /* ---------------- ワード確認 ---------------- */
+
+  var cardOpen = false;
+  var seenThisTurn = false;
+
+  function startReveal() {
+    game.revealIdx = 0;
+    show('reveal');
+    renderReveal();
+  }
+
+  function renderReveal() {
+    var i = game.revealIdx;
+    var total = game.players.length;
+    $('reveal-no').textContent = (i + 1) + '人目 / ' + total + '人';
+    $('reveal-name').textContent = game.players[i].name;
+    $('reveal-next').textContent = i === total - 1 ? '全員確認した！' : '次の人へ';
+    $('reveal-next').disabled = true;
+    seenThisTurn = false;
+    closeCard();
+
+    var dots = $('dots');
+    dots.innerHTML = '';
+    for (var d = 0; d < total; d++) {
+      var e = document.createElement('div');
+      e.className = 'dot' + (d < i ? ' done' : d === i ? ' now' : '');
+      dots.appendChild(e);
+    }
+  }
+
+  function openCard() {
+    if (cardOpen) return;
+    cardOpen = true;
+    seenThisTurn = true;
+    var p = game.players[game.revealIdx];
+    var c = $('card');
+    c.classList.add('open');
+    c.innerHTML =
+      '<div class="cat">' + esc(game.category) + '</div>' +
+      '<div class="word">' + esc(p.word) + '</div>' +
+      '<div class="msg">指を離すと隠れます</div>';
+    $('reveal-next').disabled = false;
+    buzz(12);
+  }
+
+  function closeCard() {
+    cardOpen = false;
+    var c = $('card');
+    c.classList.remove('open');
+    c.innerHTML =
+      '<div class="lock">🤫</div>' +
+      '<div class="msg">長押し（押しっぱなし）で<br>あなたのワードが表示されます</div>';
+    if (game && !seenThisTurn) $('reveal-next').disabled = true;
+  }
+
+  function nextReveal() {
+    if (game.revealIdx < game.players.length - 1) {
+      game.revealIdx++;
+      renderReveal();
+    } else {
+      startTimer();
+    }
+  }
+
+  /* ---------------- タイマー ---------------- */
+
+  var timer = { remain: 0, total: 0, running: false, id: null, endAt: 0 };
+
+  function startTimer() {
+    timer.total = cfg.seconds;
+    timer.remain = cfg.seconds;
+    timer.running = false;
+    clearInterval(timer.id);
+    $('timer-topic').textContent = 'ジャンル：' + game.category;
+    renderTimer();
+    show('timer');
+  }
+
+  function renderTimer() {
+    var t = $('time');
+    t.textContent = fmtTime(timer.remain);
+    t.classList.toggle('warn', timer.remain <= 30 && timer.remain > 10);
+    t.classList.toggle('danger', timer.remain <= 10);
+    $('timer-bar').style.width = (timer.total ? (timer.remain / timer.total) * 100 : 0) + '%';
+    $('timer-toggle').textContent = timer.running ? '一時停止' : (timer.remain === timer.total ? 'スタート' : '再開');
+    $('timer-state').textContent = timer.remain === 0
+      ? '時間切れ！投票へ進もう'
+      : timer.running ? '議論中…' : 'タップでスタート';
+  }
+
+  function tick() {
+    var remain = Math.max(0, Math.round((timer.endAt - Date.now()) / 1000));
+    if (remain !== timer.remain) {
+      timer.remain = remain;
+      if (remain > 0 && remain <= 5) { beep(880, 0.12); buzz(20); }
+      if (remain === 0) {
+        timer.running = false;
+        clearInterval(timer.id);
+        beep(660, 0.25);
+        setTimeout(function () { beep(520, 0.5); }, 260);
+        buzz([120, 80, 120, 80, 260]);
+      }
+      renderTimer();
+    }
+  }
+
+  function toggleTimer() {
+    if (timer.running) {
+      timer.running = false;
+      clearInterval(timer.id);
+    } else {
+      if (timer.remain === 0) { timer.remain = timer.total; }
+      timer.endAt = Date.now() + timer.remain * 1000;
+      timer.running = true;
+      clearInterval(timer.id);
+      timer.id = setInterval(tick, 200);
+      beep(740, 0.1);
+    }
+    renderTimer();
+  }
+
+  function addTime(sec) {
+    timer.remain += sec;
+    timer.total = Math.max(timer.total, timer.remain);
+    if (timer.running) timer.endAt = Date.now() + timer.remain * 1000;
+    renderTimer();
+  }
+
+  function stopTimer() {
+    timer.running = false;
+    clearInterval(timer.id);
+  }
+
+  /* ---------------- 投票 ---------------- */
+
+  var selected = null;
+
+  function startVote() {
+    stopTimer();
+    game.candidates = game.players.map(function (_, i) { return i; });
+    game.votes = {};
+    game.voterIdx = 0;
+    selected = null;
+    renderVote();
+    show('vote');
+  }
+
+  function startRevote(tied) {
+    game.candidates = tied.slice();
+    game.votes = {};
+    game.voterIdx = 0;
+    selected = null;
+    renderVote();
+    show('vote');
+  }
+
+  function renderVote() {
+    var list = $('vote-list');
+    list.innerHTML = '';
+    var strict = cfg.strictVote;
+    var voter = strict ? game.voterIdx : -1;
+    var reVote = game.candidates.length < game.players.length;
+
+    if (strict) {
+      $('vote-title').textContent = game.players[voter].name + ' の番';
+      $('vote-sub').textContent = 'ウルフだと思う人に投票（自分以外）' + (reVote ? '／再投票' : '');
+    } else {
+      $('vote-title').textContent = reVote ? '再投票' : '投票';
+      $('vote-sub').textContent = 'せーの、で指差し！ 最多票の人を選ぼう';
+    }
+
+    game.candidates.forEach(function (i) {
+      var b = document.createElement('button');
+      b.className = 'pbtn' + (selected === i ? ' sel' : '');
+      var self = strict && i === voter;
+      b.disabled = self;
+      b.innerHTML = '<span>' + esc(game.players[i].name) + '</span>' +
+        (self ? '<span class="tag">自分</span>' : '<span class="tag">' + (selected === i ? '選択中' : '選ぶ') + '</span>');
+      b.onclick = function () { selected = i; renderVote(); };
+      list.appendChild(b);
+    });
+
+    $('vote-confirm').disabled = selected === null;
+    $('vote-confirm').textContent = strict
+      ? (game.voterIdx === game.players.length - 1 ? '開票する' : '次の人へ')
+      : '決定';
+  }
+
+  function confirmVote() {
+    if (selected === null) return;
+    if (cfg.strictVote) {
+      game.votes[selected] = (game.votes[selected] || 0) + 1;
+      if (game.voterIdx < game.players.length - 1) {
+        game.voterIdx++;
+        selected = null;
+        renderVote();
+        beep(660, 0.08);
+        return;
+      }
+      renderTally();
+      show('tally');
+    } else {
+      game.executed = selected;
+      goResult();
+    }
+  }
+
+  function renderTally() {
+    var counts = game.candidates.map(function (i) {
+      return { i: i, n: game.votes[i] || 0 };
+    });
+    var max = counts.reduce(function (a, c) { return Math.max(a, c.n); }, 0);
+    var top = counts.filter(function (c) { return c.n === max && max > 0; });
+
+    counts.sort(function (a, b) { return b.n - a.n; });
+    var list = $('tally-list');
+    list.innerHTML = '';
+    counts.forEach(function (c) {
+      var d = document.createElement('div');
+      d.className = 't';
+      d.innerHTML =
+        '<div class="nm">' + esc(game.players[c.i].name) + '</div>' +
+        '<div class="ct">' + c.n + '票</div>' +
+        '<div class="tb"><i style="width:' + (max ? (c.n / max) * 100 : 0) + '%"></i></div>';
+      list.appendChild(d);
+    });
+
+    var tie = top.length > 1;
+    $('tally-sub').textContent = tie
+      ? '同票！ 決着がつかないぞ…'
+      : esc(game.players[top[0].i].name) + ' が最多票';
+
+    var alt = $('tally-alt');
+    if (!alt) {
+      alt = document.createElement('button');
+      alt.className = 'btn sub';
+      alt.id = 'tally-alt';
+      $('tally-next').parentNode.appendChild(alt);
+    }
+
+    if (tie) {
+      $('tally-next').textContent = '同票の人で再投票';
+      $('tally-next').onclick = function () { startRevote(top.map(function (c) { return c.i; })); };
+      alt.style.display = '';
+      alt.textContent = '決着つかず（ウルフの勝ち）';
+      alt.onclick = function () { game.executed = null; goResult(); };
+    } else {
+      $('tally-next').textContent = esc(game.players[top[0].i].name) + ' を追放して結果へ';
+      $('tally-next').onclick = function () { game.executed = top[0].i; goResult(); };
+      alt.style.display = 'none';
+    }
+  }
+
+  /* ---------------- 結果 ---------------- */
+
+  function goResult() {
+    game.revengeAsked = false;
+    game.announced = false;
+    game.jinglePlayed = false;
+    renderResult();
+    show('result');
+  }
+
+  function renderResult() {
+    $('w-citizen').textContent = game.citizenWord;
+    $('w-wolf').textContent = game.wolfWord;
+
+    var roles = $('roles');
+    roles.innerHTML = '';
+    game.players.forEach(function (p, i) {
+      var d = document.createElement('div');
+      d.className = 'r ' + (p.isWolf ? 'w' : 'c');
+      d.innerHTML =
+        '<div>' + esc(p.name) +
+        (game.executed === i ? '<span class="out">← 追放</span>' : '') + '</div>' +
+        '<div class="badge">' + (p.isWolf ? 'ウルフ' : '市民') + '</div>';
+      roles.appendChild(d);
+    });
+
+    var caught = game.executed !== null && game.players[game.executed].isWolf;
+    var v = $('verdict');
+    var foot = $('result-foot');
+
+    // 逆転チャンス
+    if (caught && cfg.revenge && !game.revengeAsked) {
+      v.className = 'verdict';
+      $('verdict-big').textContent = '逆転チャンス！';
+      $('verdict-sub').innerHTML =
+        '追放された <b>' + esc(game.players[game.executed].name) + '</b> はウルフでした。<br>' +
+        'ここで <b>市民のワード</b> をズバリ当てられたら、ウルフの逆転勝ち！<br>' +
+        '声に出して答えてもらおう。';
+      $('words2').hidden = true;
+      $('roles-head').hidden = true;
+      $('roles').hidden = true;
+      $('suspense').hidden = false;
+      foot.innerHTML = '';
+      var ok = document.createElement('button');
+      ok.className = 'btn';
+      ok.textContent = '当たった！（ウルフの逆転勝ち）';
+      ok.onclick = function () { game.revengeAsked = 'win'; renderResult(); };
+      var ng = document.createElement('button');
+      ng.className = 'btn sub';
+      ng.textContent = 'はずれ（市民の勝ち）';
+      ng.onclick = function () { game.revengeAsked = 'lose'; renderResult(); };
+      foot.appendChild(ok);
+      foot.appendChild(ng);
+      beep(880, 0.12);
+      setTimeout(function () { beep(1040, 0.18); }, 130);
+      return;
+    }
+
+    var citizensWin = caught && game.revengeAsked !== 'win';
+    v.className = 'verdict ' + (citizensWin ? 'citizen' : 'wolf');
+    $('words2').hidden = false;
+    $('roles-head').hidden = !game.announced;
+    $('roles').hidden = !game.announced;
+    $('suspense').hidden = game.announced;
+    $('verdict-big').textContent = citizensWin ? '市民の勝ち！' : 'ウルフの勝ち！';
+
+    // 発表ボタンを押すまでは、ウルフの名前を出さない
+    var wolfNames = game.players.filter(function (p) { return p.isWolf; })
+      .map(function (p) { return p.name; }).join('・');
+    var reveal = game.announced ? '<br>ウルフは <b>' + esc(wolfNames) + '</b>' : '';
+    var executedName = game.executed === null ? '' : esc(game.players[game.executed].name);
+    var sub;
+    if (game.executed === null) {
+      sub = '投票で決着がつかず、ウルフが逃げ切りました。' + reveal;
+    } else if (caught && game.revengeAsked === 'win') {
+      sub = '追放された <b>' + executedName + '</b> が市民のワードを当てて大逆転！' +
+        (cfg.wolves > 1 ? reveal : '');
+    } else if (caught) {
+      sub = game.announced
+        ? 'ウルフの <b>' + executedName + '</b> を見事に追放！' + (cfg.wolves > 1 ? reveal : '')
+        : 'みんなの投票、大正解！ 追放したのはウルフでした。';
+    } else {
+      sub = '追放された <b>' + executedName + '</b> は市民でした…。' +
+        (game.announced ? reveal : 'ウルフは、まだこの中にいる。');
+    }
+    $('verdict-sub').innerHTML = sub;
+
+    foot.innerHTML = '';
+    if (!game.announced) {
+      var ann = document.createElement('button');
+      ann.className = 'btn';
+      ann.textContent = (cfg.voice ? '🔊 ' : '') + 'ウルフを発表する';
+      ann.onclick = function () { announceWolves(ann); };
+      foot.appendChild(ann);
+      var note = document.createElement('div');
+      note.className = 'note';
+      note.innerHTML = cfg.voice
+        ? 'ドラムロールのあと、AI音声がウルフの名前を読み上げます'
+        : 'タップすると全員の正体を公開します';
+      foot.appendChild(note);
+    } else {
+      var a = document.createElement('button');
+      a.className = 'btn';
+      a.textContent = '同じメンバーでもう1回';
+      a.onclick = function () { startGame(); };
+      var b = document.createElement('button');
+      b.className = 'btn sub';
+      b.textContent = '設定に戻る';
+      b.onclick = function () { renderSetup(); show('setup'); };
+      foot.appendChild(a);
+      foot.appendChild(b);
+    }
+
+    if (!game.jinglePlayed) {
+      game.jinglePlayed = true;
+      if (citizensWin) {
+        beep(660, 0.15);
+        setTimeout(function () { beep(880, 0.15); }, 150);
+        setTimeout(function () { beep(1100, 0.3); }, 300);
+      } else {
+        beep(300, 0.3);
+        setTimeout(function () { beep(220, 0.45); }, 220);
+      }
+    }
+  }
+
+  // ウルフの名前をAI音声で発表し、正体一覧を公開する
+  function announceWolves(btn) {
+    if (game.announced) return;
+    var names = game.players.filter(function (p) { return p.isWolf; })
+      .map(function (p) { return p.name; });
+    var joined = names.join('と');
+
+    btn.disabled = true;
+    btn.textContent = 'ドラムロール…';
+
+    for (var i = 0; i < 7; i++) {
+      (function (i) {
+        setTimeout(function () { beep(190 + Math.random() * 70, 0.05, 0.12); }, i * 110);
+      })(i);
+    }
+
+    var reveal = function () {
+      game.announced = true;
+      renderResult();
+    };
+
+    if (cfg.voice && speechReady()) {
+      stopSpeech();
+      setTimeout(function () {
+        speak('今回のウルフは', 1, function () {
+          setTimeout(function () {
+            speak(joined + '、でした', 0.95);
+            reveal();
+          }, 250);
+        });
+      }, 780);
+    } else {
+      setTimeout(reveal, 900);
+    }
+  }
+
+  /* ---------------- イベント登録 ---------------- */
+
+  function bind() {
+    $('pl-minus').onclick = function () {
+      if (cfg.players > MIN_PLAYERS) { cfg.players--; saveCfg(); renderSetup(); }
+    };
+    $('pl-plus').onclick = function () {
+      if (cfg.players < MAX_PLAYERS) { cfg.players++; saveCfg(); renderSetup(); }
+    };
+    $('cat-hot').onclick = function () { cfg.cats = catsInGroup('hot'); saveCfg(); renderSetup(); };
+    $('cat-classic').onclick = function () { cfg.cats = catsInGroup('classic'); saveCfg(); renderSetup(); };
+    $('cat-all').onclick = function () { cfg.cats = Object.keys(WORD_SETS); saveCfg(); renderSetup(); };
+    $('cat-none').onclick = function () { cfg.cats = []; saveCfg(); renderSetup(); };
+    $('opt-names').onclick = function () { cfg.useNames = !cfg.useNames; saveCfg(); renderSetup(); };
+    $('opt-vote').onclick = function () { cfg.strictVote = !cfg.strictVote; saveCfg(); renderSetup(); };
+    $('opt-revenge').onclick = function () { cfg.revenge = !cfg.revenge; saveCfg(); renderSetup(); };
+    $('opt-voice').onclick = function () {
+      cfg.voice = !cfg.voice;
+      saveCfg();
+      renderSetup();
+      // 端末に音声を用意させるため、ONにした瞬間に一度だけ空読みしておく
+      if (cfg.voice && speechReady()) speak('じゅんび かんりょう', 1.1);
+    };
+    $('start').onclick = startGame;
+    $('show-rules').onclick = function () { show('rules'); };
+    $('rules-back').onclick = function () { show('setup'); };
+
+    var card = $('card');
+    card.addEventListener('pointerdown', function (e) { e.preventDefault(); openCard(); });
+    card.addEventListener('pointerup', closeCard);
+    card.addEventListener('pointercancel', closeCard);
+    card.addEventListener('pointerleave', closeCard);
+    card.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+    $('reveal-next').onclick = nextReveal;
+
+    $('timer-toggle').onclick = toggleTimer;
+    $('timer-plus').onclick = function () { addTime(30); };
+    $('to-vote').onclick = startVote;
+
+    $('vote-confirm').onclick = confirmVote;
+    $('vote-back').onclick = function () { show('timer'); };
+
+    $('again-same').onclick = startGame;
+    $('again-setup').onclick = function () { renderSetup(); show('setup'); };
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden && timer.running) toggleTimer();
+      if (document.hidden) stopSpeech();
+    });
+
+    if (speechReady()) {
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }
+
+  loadCfg();
+  bind();
+  renderSetup();
+})();
+</script>
+</body>
+</html>
