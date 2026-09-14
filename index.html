@@ -468,6 +468,13 @@ h2.section:first-child { margin-top: 0; }
         <button class="btn sub" id="cat-all">すべて</button>
         <button class="btn sub" id="cat-none">解除</button>
       </div>
+      <div class="row" style="border-top:1px solid var(--line); margin-top:14px">
+        <div>
+          <div class="label" id="pool-label">まだ出ていないお題 0 / 0</div>
+          <div class="hint">一度出たお題は、選んだジャンルを一巡するまで出ません</div>
+        </div>
+        <button class="btn sub" id="pool-reset" style="width:auto; padding:10px 14px; flex:none">履歴リセット</button>
+      </div>
     </div>
 
     <h2 class="section">オプション</h2>
@@ -692,6 +699,10 @@ const WORD_SETS = {
       ['Number_i', 'M!LK'],
       ['乃木坂46', '日向坂46'],
       ['BTS', 'BLACKPINK'],
+      ['レインボー', 'ハナコ'],
+      ['令和ロマン', 'ミルクボーイ'],
+      ['山田杏奈', '白石聖'],
+      ['timelesz', 'Snow Man'],
     ],
   },
 
@@ -736,10 +747,18 @@ const WORD_SETS = {
       ['リモートワーク', '週休3日'],
       ['電動キックボード', 'シェアサイクル'],
       ['サブスク', 'クラウドファンディング'],
-      ['大阪・関西万博', 'オリンピック'],
+      ['ワールドカップ', 'オリンピック'],
       ['Z世代', 'ゆとり世代'],
       ['韓国グルメ', '台湾グルメ'],
       ['熱中症', '花粉症'],
+      ['タイパ', 'コスパ'],
+      ['防災グッズ', '非常食'],
+      ['敬老の日', '母の日'],
+      ['線状降水帯', 'ゲリラ豪雨'],
+      ['マイナ保険証', 'お薬手帳'],
+      ['電子書籍', 'オーディオブック'],
+      ['朝ドラ', '大河ドラマ'],
+      ['ふるさと納税', 'ポイ活'],
     ],
   },
 
@@ -770,6 +789,12 @@ const WORD_SETS = {
       ['SPY×FAMILY', '【推しの子】'],
       ['銀魂', '斉木楠雄のΨ難'],
       ['ちいかわ', 'すみっコぐらし'],
+      ['薬屋のひとりごと', '葬送のフリーレン'],
+      ['ダンダダン', 'チェンソーマン'],
+      ['アオのハコ', 'かぐや様は告らせたい'],
+      ['東京リベンジャーズ', '呪術廻戦'],
+      ['ジョジョの奇妙な冒険', '鋼の錬金術師'],
+      ['アオアシ', 'ブルーロック'],
     ],
   },
 
@@ -1023,6 +1048,7 @@ const WORD_SETS = {
 
   var $ = function (id) { return document.getElementById(id); };
   var LS_KEY = 'wordwolf.config.v1';
+  var USED_KEY = 'wordwolf.used.v1';
   var MIN_PLAYERS = 3;
   var MAX_PLAYERS = 12;
   var TIME_OPTIONS = [30, 60, 120, 180, 300];
@@ -1090,6 +1116,46 @@ const WORD_SETS = {
 
   function saveCfg() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(cfg)); } catch (e) {}
+  }
+
+  /* ---- 出題履歴（同じお題を続けて出さないための記録） ---- */
+
+  var used = [];
+
+  function loadUsed() {
+    try {
+      var raw = localStorage.getItem(USED_KEY);
+      used = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(used)) used = [];
+    } catch (e) { used = []; }
+  }
+
+  function saveUsed() {
+    try { localStorage.setItem(USED_KEY, JSON.stringify(used)); } catch (e) {}
+  }
+
+  // 選択中ジャンルの全お題。key はお題ごとの識別子（履歴の照合に使う）
+  function buildPool() {
+    var pool = [];
+    cfg.cats.forEach(function (cat) {
+      var set = WORD_SETS[cat];
+      if (!set) return;
+      set.pairs.forEach(function (p) {
+        pool.push({ pair: p, cat: set.label, key: cat + '|' + p[0] + '|' + p[1] });
+      });
+    });
+    return pool;
+  }
+
+  function unusedOf(pool) {
+    return pool.filter(function (e) { return used.indexOf(e.key) < 0; });
+  }
+
+  // 現在のジャンル分の履歴だけを消す（他ジャンルの履歴は残す）
+  function clearUsedFor(pool) {
+    var keys = pool.map(function (e) { return e.key; });
+    used = used.filter(function (k) { return keys.indexOf(k) < 0; });
+    saveUsed();
   }
 
   function loadCfg() {
@@ -1243,6 +1309,11 @@ const WORD_SETS = {
     $('names-wrap').style.display = cfg.useNames ? '' : 'none';
     if (cfg.useNames) renderNameInputs();
 
+    var pool = buildPool();
+    var left = unusedOf(pool).length;
+    $('pool-label').textContent = 'まだ出ていないお題 ' + left + ' / ' + pool.length;
+    $('pool-reset').disabled = left === pool.length;
+
     $('start').disabled = cfg.cats.length === 0;
     $('start').textContent = cfg.cats.length === 0 ? 'ジャンルを1つ以上選んでね' : 'ゲームスタート';
   }
@@ -1266,15 +1337,20 @@ const WORD_SETS = {
   /* ---------------- ゲーム開始 ---------------- */
 
   function startGame() {
-    var pool = [];
-    cfg.cats.forEach(function (key) {
-      WORD_SETS[key].pairs.forEach(function (p) {
-        pool.push({ pair: p, cat: WORD_SETS[key].label });
-      });
-    });
+    var pool = buildPool();
     if (!pool.length) return;
 
-    var chosen = pick(pool);
+    // まだ出していないお題から引く。全部出し切ったらこのジャンルの履歴をリセット
+    var fresh = unusedOf(pool);
+    if (!fresh.length) {
+      clearUsedFor(pool);
+      fresh = pool;
+    }
+
+    var chosen = pick(fresh);
+    used.push(chosen.key);
+    saveUsed();
+
     var pair = chosen.pair.slice();
     if (Math.random() < 0.5) pair.reverse();
 
@@ -1737,6 +1813,7 @@ const WORD_SETS = {
     $('cat-classic').onclick = function () { cfg.cats = catsInGroup('classic'); saveCfg(); renderSetup(); };
     $('cat-all').onclick = function () { cfg.cats = Object.keys(WORD_SETS); saveCfg(); renderSetup(); };
     $('cat-none').onclick = function () { cfg.cats = []; saveCfg(); renderSetup(); };
+    $('pool-reset').onclick = function () { clearUsedFor(buildPool()); renderSetup(); };
     $('opt-names').onclick = function () { cfg.useNames = !cfg.useNames; saveCfg(); renderSetup(); };
     $('opt-vote').onclick = function () { cfg.strictVote = !cfg.strictVote; saveCfg(); renderSetup(); };
     $('opt-revenge').onclick = function () { cfg.revenge = !cfg.revenge; saveCfg(); renderSetup(); };
@@ -1782,6 +1859,7 @@ const WORD_SETS = {
   }
 
   loadCfg();
+  loadUsed();
   bind();
   renderSetup();
 })();
