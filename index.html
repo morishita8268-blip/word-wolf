@@ -204,7 +204,8 @@ h2.section:first-child { margin-top: 0; }
 }
 .btn:disabled { opacity: 0.35; cursor: default; }
 .btn-row { display: flex; gap: 10px; }
-.btn-row .btn { flex: 1; }
+.btn-row .btn { flex: 1; min-width: 0; }
+.btn-row .btn.sub { font-size: 15px; padding: 12px 6px; white-space: nowrap; }
 
 .spacer { flex: 1; min-height: 20px; }
 .foot { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
@@ -461,19 +462,20 @@ h2.section:first-child { margin-top: 0; }
     <div class="panel">
       <div class="chips" id="cat-chips"></div>
       <div class="btn-row" style="margin-top:12px">
-        <button class="btn sub" id="cat-hot">有名人・時事だけ</button>
-        <button class="btn sub" id="cat-classic">定番だけ</button>
+        <button class="btn sub" id="cat-buzz">🔥 バズ狙い</button>
+        <button class="btn sub" id="cat-hot">⭐ 有名人</button>
       </div>
       <div class="btn-row" style="margin-top:8px">
+        <button class="btn sub" id="cat-classic">🍜 定番</button>
         <button class="btn sub" id="cat-all">すべて</button>
         <button class="btn sub" id="cat-none">解除</button>
       </div>
       <div class="row" style="border-top:1px solid var(--line); margin-top:14px">
         <div>
-          <div class="label" id="pool-label">まだ出ていないお題 0 / 0</div>
+          <div class="label" id="pool-label" style="white-space:nowrap">未出題 0 / 0</div>
           <div class="hint">一度出たお題は、選んだジャンルを一巡するまで出ません</div>
         </div>
-        <button class="btn sub" id="pool-reset" style="width:auto; padding:10px 14px; flex:none">履歴リセット</button>
+        <button class="btn sub" id="pool-reset" style="width:auto; padding:10px 14px; flex:none; font-size:13px">履歴リセット</button>
       </div>
     </div>
 
@@ -645,14 +647,136 @@ h2.section:first-child { margin-top: 0; }
 // ワードウルフ お題データ
 //
 // 各ペアは [ワードA, ワードB]。どちらが市民側（多数派）になるかは毎回ランダムで入れ替わる。
-// group: 'hot' = 有名人・時事ネタ系 / 'classic' = 定番のモノ・コト系
+// group: 'buzz'    = 今バズってる・コメントが伸びる系（旬が命。定期的に入れ替える）
+//        'hot'     = 有名人・アニメ系
+//        'classic' = 定番のモノ・コト系
 //
 // ペアを選ぶ基準（追加するときもこれを守ると遊びとして成立する）
 //   1. 両方とも「その場の全員が知っている」レベルの知名度であること
 //   2. 同じジャンル・同じ立ち位置であること（例：トップYouTuber同士、同競技の選手同士）
 //   3. 話し方や思い出は違うのに、話題としては会話が成立する距離感であること
 const WORD_SETS = {
-  /* ============ 有名人・時事ネタ系 ============ */
+  /* ============ 今バズってる系（旬・コメントが伸びる） ============ */
+
+  battle: {
+    label: '🔥 論争・どっち派',
+    group: 'buzz',
+    pairs: [
+      ['きのこの山', 'たけのこの里'],
+      ['目玉焼きに醤油', '目玉焼きにソース'],
+      ['朝ごはんはパン', '朝ごはんはごはん'],
+      ['シャワー派', '湯船派'],
+      ['犬派', '猫派'],
+      ['カレーに福神漬け', 'カレーにらっきょう'],
+      ['ツナマヨおにぎり', '鮭おにぎり'],
+      ['肉まん', 'ピザまん'],
+      ['インドア派', 'アウトドア派'],
+      ['早起き', '夜更かし'],
+      ['海派', '山派'],
+      ['卵かけご飯', '納豆ご飯'],
+      ['冷やし中華', 'そうめん'],
+      ['ミルクティー', 'レモンティー'],
+      ['あんこ', 'クリーム'],
+      ['こしあん', 'つぶあん'],
+      ['きつねうどん', 'たぬきそば'],
+      ['ポテトにケチャップ', 'ポテトに塩'],
+    ],
+  },
+
+  buzzword: {
+    label: '🗣 バズワード・若者言葉',
+    group: 'buzz',
+    pairs: [
+      ['滅', 'バビる'],
+      ['エモい', '尊い'],
+      ['それな', 'わかる'],
+      ['陽キャ', '陰キャ'],
+      ['しか勝たん', '優勝'],
+      ['ガチ', 'まじ'],
+      ['バズる', '伸びる'],
+      ['映え', 'エモ'],
+      ['推し', '自担'],
+      ['解釈一致', '履修'],
+      ['界隈', 'クラスタ'],
+      ['メンブレ', 'メンヘラ'],
+      ['チル', 'まったり'],
+      ['ワンチャン', 'あわよくば'],
+      ['匂わせ', 'ほのめかし'],
+      ['沼', 'ハマる'],
+    ],
+  },
+
+  song: {
+    label: '🎵 バズソング・アーティスト',
+    group: 'buzz',
+    pairs: [
+      ['Mrs. GREEN APPLE', 'Official髭男dism'],
+      ['Vaundy', 'Creepy Nuts'],
+      ['tuki.', 'ヨルシカ'],
+      ['back number', 'あいみょん'],
+      ['=LOVE', '≠ME'],
+      ['モナキ', 'M!LK'],
+      ['乃木坂46', '櫻坂46'],
+      ['SEVENTEEN', 'Stray Kids'],
+      ['NewJeans', 'LE SSERAFIM'],
+      ['Bling-Bang-Bang-Born', 'アイドル'],
+      ['晩餐歌', 'ケセラセラ'],
+      ['怪獣の花唄', 'ドライフラワー'],
+      ['カラオケの十八番', '結婚式の定番曲'],
+      ['アニソン', 'ボカロ'],
+      ['シティポップ', 'ユーロビート'],
+    ],
+  },
+
+  gourmet: {
+    label: '🍮 コンビニ・チェーン店',
+    group: 'buzz',
+    pairs: [
+      ['セブンイレブン', 'ローソン'],
+      ['ファミマ', 'ローソン'],
+      ['からあげクン', 'ファミチキ'],
+      ['スタバ', 'タリーズ'],
+      ['マック', 'モスバーガー'],
+      ['ケンタッキー', 'マック'],
+      ['すき家', '吉野家'],
+      ['丸亀製麺', 'はなまるうどん'],
+      ['サイゼリヤ', 'ガスト'],
+      ['スシロー', 'くら寿司'],
+      ['ミスド', 'クリスピークリーム'],
+      ['コメダ珈琲', '星乃珈琲'],
+      ['ドン・キホーテ', 'カルディ'],
+      ['業務スーパー', 'コストコ'],
+      ['ハーゲンダッツ', 'パルム'],
+      ['シャトレーゼ', '不二家'],
+      ['一蘭', '天下一品'],
+      ['餃子の王将', '日高屋'],
+    ],
+  },
+
+  game: {
+    label: '🎮 ゲーム',
+    group: 'hot',
+    pairs: [
+      ['フォートナイト', 'APEX'],
+      ['マインクラフト', 'Roblox'],
+      ['あつまれ どうぶつの森', 'マインクラフト'],
+      ['スプラトゥーン', 'マリオカート'],
+      ['ポケモンGO', 'ポケポケ'],
+      ['モンスト', 'パズドラ'],
+      ['原神', 'ゼンレスゾーンゼロ'],
+      ['ウマ娘', 'プロセカ'],
+      ['スマブラ', 'ストリートファイター'],
+      ['マリオ', 'カービィ'],
+      ['ゼルダの伝説', 'モンスターハンター'],
+      ['ドラクエ', 'ファイナルファンタジー'],
+      ['桃鉄', '人生ゲーム'],
+      ['Among Us', '人狼'],
+      ['太鼓の達人', 'マリオパーティ'],
+      ['ぷよぷよ', 'テトリス'],
+    ],
+  },
+
+  /* ============ 有名人・アニメ系 ============ */
 
   youtuber: {
     label: '📺 YouTuber・配信者',
@@ -666,6 +790,8 @@ const WORD_SETS = {
       ['きまぐれクック', 'リュウジ'],
       ['ホロライブ', 'にじさんじ'],
       ['兎田ぺこら', '星街すいせい'],
+      ['宝鐘マリン', '兎田ぺこら'],
+      ['葛葉', '壱百満天原サロメ'],
       ['加藤純一', '布団ちゃん'],
       ['QuizKnock', '中田敦彦'],
       ['ヒカル', 'ラファエル'],
@@ -729,7 +855,7 @@ const WORD_SETS = {
 
   trend: {
     label: '📰 時事・トレンド',
-    group: 'hot',
+    group: 'buzz',
     pairs: [
       ['ChatGPT', 'Gemini'],
       ['AIイラスト', 'AI動画'],
@@ -759,6 +885,9 @@ const WORD_SETS = {
       ['電子書籍', 'オーディオブック'],
       ['朝ドラ', '大河ドラマ'],
       ['ふるさと納税', 'ポイ活'],
+      ['Netflix', 'Amazonプライム'],
+      ['ショート動画', 'ライブ配信'],
+      ['サブスク疲れ', 'SNS疲れ'],
     ],
   },
 
@@ -920,7 +1049,7 @@ const WORD_SETS = {
     ],
   },
   entertainment: {
-    label: '🎮 エンタメ',
+    label: '🎪 エンタメ',
     group: 'classic',
     pairs: [
       ['YouTube', 'TikTok'],
@@ -1061,7 +1190,7 @@ const WORD_SETS = {
     players: 4,
     wolves: 1,
     seconds: 180,
-    cats: catsInGroup('hot'),
+    cats: catsInGroup('buzz').concat(catsInGroup('hot')),
     useNames: false,
     strictVote: false,
     revenge: true,
@@ -1311,7 +1440,7 @@ const WORD_SETS = {
 
     var pool = buildPool();
     var left = unusedOf(pool).length;
-    $('pool-label').textContent = 'まだ出ていないお題 ' + left + ' / ' + pool.length;
+    $('pool-label').textContent = '未出題 ' + left + ' / ' + pool.length + ' お題';
     $('pool-reset').disabled = left === pool.length;
 
     $('start').disabled = cfg.cats.length === 0;
@@ -1809,6 +1938,7 @@ const WORD_SETS = {
     $('pl-plus').onclick = function () {
       if (cfg.players < MAX_PLAYERS) { cfg.players++; saveCfg(); renderSetup(); }
     };
+    $('cat-buzz').onclick = function () { cfg.cats = catsInGroup('buzz'); saveCfg(); renderSetup(); };
     $('cat-hot').onclick = function () { cfg.cats = catsInGroup('hot'); saveCfg(); renderSetup(); };
     $('cat-classic').onclick = function () { cfg.cats = catsInGroup('classic'); saveCfg(); renderSetup(); };
     $('cat-all').onclick = function () { cfg.cats = Object.keys(WORD_SETS); saveCfg(); renderSetup(); };
