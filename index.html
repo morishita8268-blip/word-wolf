@@ -458,10 +458,9 @@ h2.section:first-child { margin-top: 0; }
       <div class="chips" id="time-chips"></div>
     </div>
 
-    <h2 class="section">お題ジャンル（複数選択OK）</h2>
+    <h2 class="section">お題ジャンル</h2>
     <div class="panel">
-      <div class="chips" id="cat-chips"></div>
-      <div class="btn-row" style="margin-top:12px">
+      <div class="btn-row">
         <button class="btn sub" id="cat-buzz">🔥 バズ狙い</button>
         <button class="btn sub" id="cat-hot">⭐ 有名人</button>
       </div>
@@ -470,6 +469,8 @@ h2.section:first-child { margin-top: 0; }
         <button class="btn sub" id="cat-all">すべて</button>
         <button class="btn sub" id="cat-none">解除</button>
       </div>
+      <button class="btn sub" id="cat-toggle" style="margin-top:10px">ジャンルを選ぶ ▾</button>
+      <div class="chips" id="cat-chips" hidden style="margin-top:12px"></div>
       <div class="row" style="border-top:1px solid var(--line); margin-top:14px">
         <div>
           <div class="label" id="pool-label" style="white-space:nowrap">未出題 0 / 0</div>
@@ -776,6 +777,143 @@ const WORD_SETS = {
     ],
   },
 
+  news: {
+    label: '🗞 ニュース・報道',
+    group: 'buzz',
+    pairs: [
+      ['記者会見', '謝罪会見'],
+      ['速報', '号外'],
+      ['スクープ', '独占インタビュー'],
+      ['ワイドショー', '情報番組'],
+      ['実名報道', '匿名報道'],
+      ['密着取材', '街頭インタビュー'],
+      ['コメンテーター', '解説者'],
+      ['世論調査', 'アンケート'],
+      ['フェイクニュース', 'デマ'],
+      ['誤報', '訂正'],
+      ['取材拒否', 'ノーコメント'],
+      ['生中継', '生放送'],
+      ['一面トップ', 'トレンド1位'],
+      ['週刊誌', 'ネットニュース'],
+      ['釈明', '弁明'],
+      ['記者', 'カメラマン'],
+    ],
+  },
+
+  flame: {
+    label: '💢 炎上・SNSトラブル',
+    group: 'buzz',
+    pairs: [
+      ['炎上', 'バズり'],
+      ['鍵アカ', '裏アカ'],
+      ['誤爆', '誤送信'],
+      ['乗っ取り', 'なりすまし'],
+      ['既読スルー', 'ブロック'],
+      ['スクショ', '証拠'],
+      ['自作自演', 'サクラ'],
+      ['ステマ', '案件'],
+      ['垢消し', '鍵かけ'],
+      ['謝罪文', '説明動画'],
+      ['通報', 'ミュート'],
+      ['リプ欄', '引用リポスト'],
+      ['アンチ', '信者'],
+      ['意味深投稿', 'ポエム投稿'],
+      ['深夜のテンション', '酔いツイート'],
+      ['相互フォロー', 'フォロバ'],
+    ],
+  },
+
+  mystery: {
+    label: '🔍 ミステリー・推理',
+    group: 'hot',
+    pairs: [
+      ['名探偵', '刑事'],
+      ['アリバイ', '動機'],
+      ['密室', 'トリック'],
+      ['容疑者', '目撃者'],
+      ['指紋', '足跡'],
+      ['迷宮入り', '時効'],
+      ['取り調べ', '尋問'],
+      ['張り込み', '尾行'],
+      ['科捜研', '鑑識'],
+      ['サスペンス', 'ホラー'],
+      ['どんでん返し', '伏線回収'],
+      ['暗号', '遺言状'],
+      ['証拠', '証言'],
+      ['監視カメラ', 'ドライブレコーダー'],
+      ['共犯者', '黒幕'],
+      ['推理', '勘'],
+    ],
+  },
+
+  occult: {
+    label: '👻 都市伝説・オカルト',
+    group: 'buzz',
+    pairs: [
+      ['心霊スポット', '廃墟'],
+      ['都市伝説', '怪談'],
+      ['UFO', 'UMA'],
+      ['幽霊', '妖怪'],
+      ['予言', '占い'],
+      ['金縛り', 'デジャヴ'],
+      ['心霊写真', '怪奇現象'],
+      ['タイムスリップ', 'パラレルワールド'],
+      ['呪い', 'ジンクス'],
+      ['お祓い', 'パワースポット'],
+      ['陰謀論', 'オカルト'],
+      ['宇宙人', '未来人'],
+      ['生き霊', '守護霊'],
+      ['ドッペルゲンガー', '生き写し'],
+      ['開かずの間', '禁じられた森'],
+    ],
+  },
+
+  tech: {
+    label: '🤖 AI・テクノロジー',
+    group: 'buzz',
+    pairs: [
+      ['生成AI', 'AIエージェント'],
+      ['ディープフェイク', 'AI生成画像'],
+      ['AI面接', 'オンライン面接'],
+      ['自動運転', 'ドローン配達'],
+      ['スマートウォッチ', 'ワイヤレスイヤホン'],
+      ['顔認証', '指紋認証'],
+      ['メタバース', 'VRゴーグル'],
+      ['ロボット掃除機', '食洗機'],
+      ['クラウド', '外付けHDD'],
+      ['パスワード', 'パスキー'],
+      ['AI彼女', 'バーチャル友達'],
+      ['翻訳アプリ', '通訳'],
+      ['スマホ決済', 'タッチ決済'],
+      ['電子署名', 'ハンコ'],
+      ['AI要約', '議事録アプリ'],
+      ['プロンプト', '呪文'],
+    ],
+  },
+
+  money: {
+    label: '💸 お金・値上げ',
+    group: 'buzz',
+    pairs: [
+      ['値上げ', '便乗値上げ'],
+      ['実質値上げ', 'ステルス値上げ'],
+      ['電気代', 'ガス代'],
+      ['ガソリン代', '高速代'],
+      ['家賃', '住宅ローン'],
+      ['社会保険料', '所得税'],
+      ['ボーナス', '昇給'],
+      ['ポイント還元', '割引クーポン'],
+      ['節約', '我慢'],
+      ['サブスク代', '通信費'],
+      ['給付金', '減税'],
+      ['最低賃金', '時給'],
+      ['通勤定期', '回数券'],
+      ['投資', '貯金'],
+      ['見栄', '背伸び'],
+      ['財布のひも', 'お小遣い'],
+    ],
+  },
+
   /* ============ 有名人・アニメ系 ============ */
 
   youtuber: {
@@ -888,6 +1026,10 @@ const WORD_SETS = {
       ['Netflix', 'Amazonプライム'],
       ['ショート動画', 'ライブ配信'],
       ['サブスク疲れ', 'SNS疲れ'],
+      ['ハロウィン', 'ブラックフライデー'],
+      ['年末年始', 'シルバーウィーク'],
+      ['インフルエンザ', '風邪'],
+      ['選挙', '国会'],
     ],
   },
 
@@ -1435,6 +1577,10 @@ const WORD_SETS = {
     $('opt-revenge').classList.toggle('on', cfg.revenge);
     $('opt-voice').classList.toggle('on', cfg.voice);
 
+    var open = !$('cat-chips').hidden;
+    $('cat-toggle').textContent = 'ジャンルを選ぶ ' + cfg.cats.length + '/' +
+      Object.keys(WORD_SETS).length + (open ? ' ▴' : ' ▾');
+
     $('names-wrap').style.display = cfg.useNames ? '' : 'none';
     if (cfg.useNames) renderNameInputs();
 
@@ -1943,6 +2089,10 @@ const WORD_SETS = {
     $('cat-classic').onclick = function () { cfg.cats = catsInGroup('classic'); saveCfg(); renderSetup(); };
     $('cat-all').onclick = function () { cfg.cats = Object.keys(WORD_SETS); saveCfg(); renderSetup(); };
     $('cat-none').onclick = function () { cfg.cats = []; saveCfg(); renderSetup(); };
+    $('cat-toggle').onclick = function () {
+      $('cat-chips').hidden = !$('cat-chips').hidden;
+      renderSetup();
+    };
     $('pool-reset').onclick = function () { clearUsedFor(buildPool()); renderSetup(); };
     $('opt-names').onclick = function () { cfg.useNames = !cfg.useNames; saveCfg(); renderSetup(); };
     $('opt-vote').onclick = function () { cfg.strictVote = !cfg.strictVote; saveCfg(); renderSetup(); };
