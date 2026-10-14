@@ -516,6 +516,13 @@ h2.section:first-child { margin-top: 0; }
       </div>
       <div class="row">
         <div>
+          <div class="label">変化球を混ぜる</div>
+          <div class="hint">たまに「全員おなじワード（平和村）」「全員ちがうワード」が出ます</div>
+        </div>
+        <button class="switch" id="opt-variant" role="switch" aria-label="変化球を混ぜる"></button>
+      </div>
+      <div class="row">
+        <div>
           <div class="label">ウルフの逆転チャンス</div>
           <div class="hint">追放されたウルフが市民のワードを当てたら逆転勝ち</div>
         </div>
@@ -644,6 +651,12 @@ h2.section:first-child { margin-top: 0; }
 
       <b>逆転チャンス（オプション）</b><br>
       追放されたウルフが市民のワードをズバリ当てたら、ウルフの逆転勝ちになります。<br><br>
+
+      <b>変化球（平和村・全員ウルフ）</b><br>
+      オンにしておくと、たまに次の2つが混ざります。どちらも投票までは普通に進みます。<br>
+      ・<b>平和村</b>：全員おなじワード。ウルフがいないのに全員で探し合うことになります<br>
+      ・<b>全員ウルフ</b>：全員ちがうワード。全員が「自分だけ違う」と思ってごまかし合います<br>
+      出る確率はそれぞれ12%と10%なので、5〜6回に1回くらい混ざります。<br><br>
 
       <b>ウルフの発表（AI音声）</b><br>
       結果画面の「ウルフを発表する」を押すと、AI音声がウルフの名前を読み上げます。
@@ -864,6 +877,105 @@ const WORD_SETS = {
       ['学食', 'コンビニ飯'],
       ['体育の見学', '保健体育'],
       ['下駄箱の手紙', '黒板の落書き'],
+    ],
+  },
+
+  original: {
+    label: '⭐ オリジナル100',
+    group: 'buzz',
+    // 社不の日常のオリジナルお題リスト（2026-10-14）。既存ジャンルと重複する分は
+    // そちらに既にあるため、ここでは省いている。
+    pairs: [
+      ['トモダチコレクション', 'どうぶつの森'],
+      ['シール帳', 'プリ帳'],
+      ['ドバイチョコ', 'ブラックサンダー'],
+      ['ChatGPT', 'Siri'],
+      ['クリスマスコフレ', '福袋'],
+      ['ラブブ', 'モンチッチ'],
+      ['ポッキー', 'プリッツ'],
+      ['肉まん', 'あんまん'],
+      ['グラタン', 'ドリア'],
+      ['卵焼き', 'だし巻き卵'],
+      ['化粧水', '乳液'],
+      ['傘', '日傘'],
+      ['エレベーター', 'エスカレーター'],
+      ['シナモロール', 'ポムポムプリン'],
+      ['コアラのマーチ', 'たべっ子どうぶつ'],
+      ['スキー', 'スノボ'],
+      ['AirPods', '有線イヤホン'],
+      ['映画館', 'プラネタリウム'],
+      ['雪見だいふく', 'ピノ'],
+      ['寝落ち通話', '長電話'],
+      ['カイロ', '湯たんぽ'],
+      ['iPhone', 'Android'],
+      ['コカ・コーラ', 'ペプシ'],
+      ['ポカリスエット', 'アクエリアス'],
+      ['ナイキ', 'アディダス'],
+      ['どん兵衛', '赤いきつね'],
+      ['午後の紅茶', '紅茶花伝'],
+      ['キャンメイク', 'セザンヌ'],
+      ['Switch', 'PlayStation'],
+      ['韓国', '台湾'],
+      ['ドトール', 'タリーズ'],
+      ['ちゃお', 'りぼん'],
+      ['関西弁', '博多弁'],
+      ['Spotify', 'Apple Music'],
+      ['Uber Eats', '出前館'],
+      ['上白石萌音', '上白石萌歌'],
+      ['新田真剣佑', '眞栄田郷敦'],
+      ['加藤清史郎', '本田望結'],
+      ['Snow Man', 'SixTONES'],
+      ['本田翼', '本田圭佑'],
+      ['山田涼介', '山田孝之'],
+      ['生田斗真', '生田絵梨花'],
+      ['DAIGO', '北川景子'],
+      ['餃子の王将', '大阪王将'],
+      ['すみっコぐらし', 'リラックマ'],
+      ['ドラゴンボール', '西遊記'],
+      ['おじいちゃん', 'おばあちゃん'],
+      ['一人っ子', '末っ子'],
+      ['長男', '長女'],
+      ['担任の先生', '保健室の先生'],
+      ['塾の先生', '家庭教師'],
+      ['バイトの店長', 'バイトの先輩'],
+      ['親友', '幼なじみ'],
+      ['校長先生', '社長'],
+      ['服屋の店員', '化粧品売り場の店員'],
+      ['近所のおばちゃん', '親戚のおばちゃん'],
+      ['イルミネーション', '夏祭り'],
+      ['年越しそば', 'お雑煮'],
+      ['ハワイ', '京都'],
+      ['終電', '始発'],
+      ['暑がり', '寒がり'],
+      ['ホラー映画', '恋愛映画'],
+      ['おうちデート', 'テーマパークデート'],
+      ['サプライズ', 'ほしい物リスト'],
+      ['ブックオフ', 'メルカリ'],
+      ['麦茶', 'めんつゆ'],
+      ['ブラックコーヒー', '醤油'],
+      ['砂糖', '塩'],
+      ['ホイップクリーム', 'シェービングクリーム'],
+      ['ゼリー', 'スライム'],
+      ['杏仁豆腐', '豆腐'],
+      ['親子丼', 'オムライス'],
+      ['すき焼き', '肉じゃが'],
+      ['プリン', '茶碗蒸し'],
+      ['フライドポテト', 'ポテトチップス'],
+      ['ショートケーキ', 'ロールケーキ'],
+      ['ナポリタン', 'ミートソース'],
+      ['自分へのご褒美', '無駄づかい'],
+      ['スカウト', 'ナンパ'],
+      ['同棲', 'ルームシェア'],
+      ['定時退社', '早退'],
+      ['仮装', 'コスプレ'],
+      ['サンタクロース', 'なまはげ'],
+      ['節約', 'ケチ'],
+      ['合格発表', '告白の返事'],
+      ['体重計', 'テストの返却'],
+      ['ドラマの最終回', '連休の最終日'],
+      ['引っ越し', '転校'],
+      ['初出勤', '初登校'],
+      ['遠距離恋愛', '留学'],
     ],
   },
 
@@ -1770,6 +1882,7 @@ const WORD_SETS = {
     strictVote: false,
     revenge: true,
     voice: true,
+    variant: true,
     names: [],
   };
 
@@ -1883,6 +1996,7 @@ const WORD_SETS = {
       if (typeof s.strictVote === 'boolean') cfg.strictVote = s.strictVote;
       if (typeof s.revenge === 'boolean') cfg.revenge = s.revenge;
       if (typeof s.voice === 'boolean') cfg.voice = s.voice;
+      if (typeof s.variant === 'boolean') cfg.variant = s.variant;
       if (Array.isArray(s.names)) cfg.names = s.names;
     } catch (e) {}
     cfg.wolves = Math.min(cfg.wolves, maxWolves(cfg.players));
@@ -2014,6 +2128,7 @@ const WORD_SETS = {
     $('opt-vote').classList.toggle('on', cfg.strictVote);
     $('opt-revenge').classList.toggle('on', cfg.revenge);
     $('opt-voice').classList.toggle('on', cfg.voice);
+    $('opt-variant').classList.toggle('on', cfg.variant);
 
     var open = !$('cat-chips').hidden;
     $('cat-toggle').textContent = 'ジャンルを選ぶ ' + cfg.cats.length + '/' +
@@ -2064,6 +2179,27 @@ const WORD_SETS = {
     used.push(chosen.key);
     saveUsed();
 
+    // 変化球：たまに「全員おなじワード（平和村）」「全員ちがうワード」にする
+    var mode = 'normal';
+    if (cfg.variant) {
+      var roll = Math.random();
+      if (roll < 0.12) mode = 'peace';
+      else if (roll < 0.22) mode = 'chaos';
+    }
+
+    // 全員ちがうワードにするには人数分の語がいる。同じジャンルから集め、
+    // 足りないジャンルだったら通常の出題に戻す
+    var chaosWords = null;
+    if (mode === 'chaos') {
+      chaosWords = [chosen.pair[0], chosen.pair[1]];
+      shuffle(pool.filter(function (e) { return e.cat === chosen.cat; })).forEach(function (e) {
+        [e.pair[0], e.pair[1]].forEach(function (wd) {
+          if (chaosWords.length < cfg.players && chaosWords.indexOf(wd) < 0) chaosWords.push(wd);
+        });
+      });
+      if (chaosWords.length < cfg.players) { mode = 'normal'; chaosWords = null; }
+    }
+
     // 3つ目の要素があれば、それは全員に見せる「お題」
     var theme = chosen.pair.length > 2 ? chosen.pair[2] : '';
     // ジャンル全体の fixWolf か、ペアの4つ目の 'wolf' が指定されていたら、
@@ -2076,16 +2212,24 @@ const WORD_SETS = {
     for (var i = 0; i < cfg.players; i++) {
       players.push({ name: playerName(i), isWolf: false, word: pair[0] });
     }
-    var idx = shuffle(players.map(function (_, i) { return i; }));
-    for (var w = 0; w < cfg.wolves; w++) {
-      players[idx[w]].isWolf = true;
-      players[idx[w]].word = pair[1];
+    if (mode === 'chaos') {
+      // 全員ちがうワード（＝全員がウルフ）
+      var mix = shuffle(chaosWords.slice());
+      players.forEach(function (p, i) { p.word = mix[i]; p.isWolf = true; });
+    } else if (mode !== 'peace') {
+      // 通常。平和村のときはウルフを立てない
+      var idx = shuffle(players.map(function (_, i) { return i; }));
+      for (var w = 0; w < cfg.wolves; w++) {
+        players[idx[w]].isWolf = true;
+        players[idx[w]].word = pair[1];
+      }
     }
 
     game = {
       players: players,
+      mode: mode,
       citizenWord: pair[0],
-      wolfWord: pair[1],
+      wolfWord: mode === 'peace' ? '' : pair[1],
       category: chosen.cat,
       theme: theme,
       revealIdx: 0,
@@ -2388,17 +2532,82 @@ const WORD_SETS = {
     roles.innerHTML = '';
     game.players.forEach(function (p, i) {
       var d = document.createElement('div');
-      d.className = 'r ' + (p.isWolf ? 'w' : 'c');
+      var badge, cls;
+      if (game.mode === 'chaos') {
+        cls = 'w'; badge = esc(p.word);
+      } else if (game.mode === 'peace') {
+        cls = 'c'; badge = '市民';
+      } else {
+        cls = p.isWolf ? 'w' : 'c'; badge = p.isWolf ? 'ウルフ' : '市民';
+      }
+      d.className = 'r ' + cls;
       d.innerHTML =
         '<div>' + esc(p.name) +
         (game.executed === i ? '<span class="out">← 追放</span>' : '') + '</div>' +
-        '<div class="badge">' + (p.isWolf ? 'ウルフ' : '市民') + '</div>';
+        '<div class="badge">' + badge + '</div>';
       roles.appendChild(d);
     });
 
     var caught = game.executed !== null && game.players[game.executed].isWolf;
     var v = $('verdict');
     var foot = $('result-foot');
+
+    // 変化球（平和村・全員ウルフ）は逆転チャンスを挟まず、専用の表示にする
+    if (game.mode === 'peace' || game.mode === 'chaos') {
+      var peace = game.mode === 'peace';
+      v.className = 'verdict ' + (peace ? 'citizen' : 'wolf');
+      $('words2').hidden = !peace;
+      $('w-citizen').textContent = game.citizenWord;
+      $('w-wolf').textContent = '—';
+      $('roles-head').hidden = !game.announced;
+      $('roles').hidden = !game.announced;
+      $('suspense').hidden = game.announced;
+
+      if (!game.announced) {
+        $('verdict-big').textContent = '…？';
+        $('verdict-sub').innerHTML = game.executed === null
+          ? '投票では決着がつきませんでした。'
+          : '追放されたのは <b>' + esc(game.players[game.executed].name) + '</b>。さて、正解は。';
+      } else {
+        $('verdict-big').textContent = peace ? '平和村！' : '全員ウルフ！';
+        $('verdict-sub').innerHTML = peace
+          ? 'ウルフは<b>いませんでした</b>。全員おなじワードです。'
+          : '<b>全員ちがうワード</b>でした。全員が自分だけ違うと思っていたはず。';
+      }
+
+      foot.innerHTML = '';
+      if (!game.announced) {
+        var ann2 = document.createElement('button');
+        ann2.className = 'btn';
+        ann2.textContent = (cfg.voice ? '🔊 ' : '') + 'ウルフを発表する';
+        ann2.onclick = function () { announceWolves(ann2); };
+        foot.appendChild(ann2);
+        var note2 = document.createElement('div');
+        note2.className = 'note';
+        note2.innerHTML = cfg.voice
+          ? 'AI音声が結果を読み上げます'
+          : 'タップすると全員の正体を公開します';
+        foot.appendChild(note2);
+      } else {
+        var a2 = document.createElement('button');
+        a2.className = 'btn';
+        a2.textContent = '同じメンバーでもう1回';
+        a2.onclick = function () { startGame(); };
+        var b2 = document.createElement('button');
+        b2.className = 'btn sub';
+        b2.textContent = '設定に戻る';
+        b2.onclick = function () { renderSetup(); show('setup'); };
+        foot.appendChild(a2);
+        foot.appendChild(b2);
+      }
+
+      if (!game.jinglePlayed) {
+        game.jinglePlayed = true;
+        beep(520, 0.12);
+        setTimeout(function () { beep(780, 0.2); }, 140);
+      }
+      return;
+    }
 
     // 逆転チャンス
     if (caught && cfg.revenge && !game.revengeAsked) {
@@ -2505,6 +2714,8 @@ const WORD_SETS = {
     var joined = names.length > 1
       ? names.join('と') + 'の' + names.length + '人'
       : names[0];
+    if (game.mode === 'peace') joined = 'いませんでした';
+    else if (game.mode === 'chaos') joined = '全員です。全員ちがうワードでした';
 
     btn.disabled = true;
     btn.textContent = '発表中…';
@@ -2518,7 +2729,7 @@ const WORD_SETS = {
       stopSpeech();
       speak('今回のウルフは', 1, function () {
         setTimeout(function () {
-          speak(joined + '、でした', 0.95);
+          speak(game.mode === 'normal' ? joined + '、でした' : joined, 0.95);
           reveal();
         }, 250);
       });
@@ -2549,6 +2760,7 @@ const WORD_SETS = {
     $('opt-names').onclick = function () { cfg.useNames = !cfg.useNames; saveCfg(); renderSetup(); };
     $('opt-vote').onclick = function () { cfg.strictVote = !cfg.strictVote; saveCfg(); renderSetup(); };
     $('opt-revenge').onclick = function () { cfg.revenge = !cfg.revenge; saveCfg(); renderSetup(); };
+    $('opt-variant').onclick = function () { cfg.variant = !cfg.variant; saveCfg(); renderSetup(); };
     $('opt-voice').onclick = function () {
       cfg.voice = !cfg.voice;
       saveCfg();
