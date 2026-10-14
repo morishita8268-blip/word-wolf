@@ -476,7 +476,10 @@ h2.section:first-child { margin-top: 0; }
         <button class="btn sub" id="cat-hot">⭐ 有名人</button>
       </div>
       <div class="btn-row" style="margin-top:8px">
+        <button class="btn sub" id="cat-original">📝 オリジナル100</button>
         <button class="btn sub" id="cat-classic">🍜 定番</button>
+      </div>
+      <div class="btn-row" style="margin-top:8px">
         <button class="btn sub" id="cat-all">すべて</button>
         <button class="btn sub" id="cat-none">解除</button>
       </div>
@@ -881,7 +884,7 @@ const WORD_SETS = {
   },
 
   original: {
-    label: '⭐ オリジナル100',
+    label: '📝 オリジナル100',
     group: 'buzz',
     // 社不の日常のオリジナルお題リスト（2026-10-14）。既存ジャンルと重複する分は
     // そちらに既にあるため、ここでは省いている。
@@ -2749,6 +2752,7 @@ const WORD_SETS = {
     };
     $('cat-buzz').onclick = function () { cfg.cats = catsInGroup('buzz'); saveCfg(); renderSetup(); };
     $('cat-hot').onclick = function () { cfg.cats = catsInGroup('hot'); saveCfg(); renderSetup(); };
+    $('cat-original').onclick = function () { cfg.cats = ['original']; saveCfg(); renderSetup(); };
     $('cat-classic').onclick = function () { cfg.cats = catsInGroup('classic'); saveCfg(); renderSetup(); };
     $('cat-all').onclick = function () { cfg.cats = Object.keys(WORD_SETS); saveCfg(); renderSetup(); };
     $('cat-none').onclick = function () { cfg.cats = []; saveCfg(); renderSetup(); };
