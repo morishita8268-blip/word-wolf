@@ -646,8 +646,8 @@ h2.section:first-child { margin-top: 0; }
       追放されたウルフが市民のワードをズバリ当てたら、ウルフの逆転勝ちになります。<br><br>
 
       <b>ウルフの発表（AI音声）</b><br>
-      結果画面の「ウルフを発表する」を押すと、ドラムロールのあとに
-      AI音声がウルフの名前を読み上げます。名前を入力しておくと盛り上がります。<br><br>
+      結果画面の「ウルフを発表する」を押すと、AI音声がウルフの名前を読み上げます。
+      名前を入力しておくと盛り上がります。<br><br>
 
       <b>💩 ギャップ・ウケ狙いの遊び方</b><br>
       このジャンルだけはルールの効き方が変わります。
@@ -2467,7 +2467,7 @@ const WORD_SETS = {
       var note = document.createElement('div');
       note.className = 'note';
       note.innerHTML = cfg.voice
-        ? 'ドラムロールのあと、AI音声がウルフの名前を読み上げます'
+        ? 'AI音声がウルフの名前を読み上げます'
         : 'タップすると全員の正体を公開します';
       foot.appendChild(note);
     } else {
@@ -2507,13 +2507,7 @@ const WORD_SETS = {
       : names[0];
 
     btn.disabled = true;
-    btn.textContent = 'ドラムロール…';
-
-    for (var i = 0; i < 7; i++) {
-      (function (i) {
-        setTimeout(function () { beep(190 + Math.random() * 70, 0.05, 0.12); }, i * 110);
-      })(i);
-    }
+    btn.textContent = '発表中…';
 
     var reveal = function () {
       game.announced = true;
@@ -2522,16 +2516,14 @@ const WORD_SETS = {
 
     if (cfg.voice && speechReady()) {
       stopSpeech();
-      setTimeout(function () {
-        speak('今回のウルフは', 1, function () {
-          setTimeout(function () {
-            speak(joined + '、でした', 0.95);
-            reveal();
-          }, 250);
-        });
-      }, 780);
+      speak('今回のウルフは', 1, function () {
+        setTimeout(function () {
+          speak(joined + '、でした', 0.95);
+          reveal();
+        }, 250);
+      });
     } else {
-      setTimeout(reveal, 900);
+      reveal();
     }
   }
 
