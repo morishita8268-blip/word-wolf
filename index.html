@@ -538,6 +538,10 @@ h2.section:first-child { margin-top: 0; }
     </div>
     <div class="foot">
       <button class="btn" id="reveal-next" disabled>次の人へ</button>
+      <div class="btn-row">
+        <button class="btn sub" id="reveal-back">← 前の人へ</button>
+        <button class="btn sub" id="reveal-redraw">お題を引き直す</button>
+      </div>
       <div class="note">他の人に画面を見られないように！<br>指を離すとワードは隠れます。</div>
     </div>
   </section>
@@ -1148,15 +1152,16 @@ const WORD_SETS = {
       ['東海オンエア', 'フィッシャーズ'],
       ['コムドット', 'フィッシャーズ'],
       ['Junya.じゅんや', 'ISSEI'],
-      ['Sagawa', 'Junya.じゅんや'],
+      ['平成フラミンゴ', '中町綾'],
       ['きまぐれクック', 'リュウジ'],
       ['ホロライブ', 'にじさんじ'],
       ['兎田ぺこら', '星街すいせい'],
       ['宝鐘マリン', '兎田ぺこら'],
       ['葛葉', '壱百満天原サロメ'],
       ['加藤純一', '布団ちゃん'],
-      ['QuizKnock', '中田敦彦'],
-      ['ヒカル', 'ラファエル'],
+      ['QuizKnock', '東大王'],
+      ['中田敦彦', '西野亮廣'],
+      ['ヒカル', '青汁王子'],
       ['ひろゆき', '堀江貴文'],
       ['キヨ', 'レトルト'],
       ['朝倉未来', '朝倉海'],
@@ -1291,7 +1296,8 @@ const WORD_SETS = {
       ['SPY×FAMILY', '【推しの子】'],
       ['銀魂', '斉木楠雄のΨ難'],
       ['ちいかわ', 'すみっコぐらし'],
-      ['薬屋のひとりごと', '葬送のフリーレン'],
+      ['葬送のフリーレン', 'ヴァイオレット・エヴァーガーデン'],
+      ['薬屋のひとりごと', 'SPY×FAMILY'],
       ['ダンダダン', 'チェンソーマン'],
       ['アオのハコ', 'かぐや様は告らせたい'],
       ['東京リベンジャーズ', '呪術廻戦'],
@@ -1912,6 +1918,8 @@ const WORD_SETS = {
     seenThisTurn = false;
     closeCard();
 
+    $('reveal-back').disabled = i === 0;
+
     var dots = $('dots');
     dots.innerHTML = '';
     for (var d = 0; d < total; d++) {
@@ -1944,6 +1952,13 @@ const WORD_SETS = {
       '<div class="lock">🤫</div>' +
       '<div class="msg">長押し（押しっぱなし）で<br>あなたのワードが表示されます</div>';
     if (game && !seenThisTurn) $('reveal-next').disabled = true;
+  }
+
+  function prevReveal() {
+    if (game.revealIdx > 0) {
+      game.revealIdx--;
+      renderReveal();
+    }
   }
 
   function nextReveal() {
@@ -2275,7 +2290,10 @@ const WORD_SETS = {
     if (game.announced) return;
     var names = game.players.filter(function (p) { return p.isWolf; })
       .map(function (p) { return p.name; });
-    var joined = names.join('と');
+    // 1人なら「◯◯、でした」、複数なら「◯◯と△△の2人、でした」
+    var joined = names.length > 1
+      ? names.join('と') + 'の' + names.length + '人'
+      : names[0];
 
     btn.disabled = true;
     btn.textContent = 'ドラムロール…';
@@ -2347,6 +2365,9 @@ const WORD_SETS = {
     card.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
     $('reveal-next').onclick = nextReveal;
+    $('reveal-back').onclick = prevReveal;
+    // 知らないお題を引いたとき用。引いたお題は出題済み扱いにして、最初から配り直す
+    $('reveal-redraw').onclick = startGame;
 
     $('timer-toggle').onclick = toggleTimer;
     $('timer-plus').onclick = function () { addTime(30); };
